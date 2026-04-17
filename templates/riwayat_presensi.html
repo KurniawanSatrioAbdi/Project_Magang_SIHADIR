@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Riwayat Presensi — SIHADIR Dinkominfo Kab. Demak</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Lora:wght@600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --biru:       #1a4d8f;
+  --biru-tua:   #0e3267;
+  --biru-mid:   #2563b0;
+  --biru-lite:  #dbeafe;
+  --biru-pale:  #f0f5ff;
+  --hijau:      #15803d;
+  --hijau-lt:   #dcfce7;
+  --hijau-mid:  #16a34a;
+  --merah:      #b91c1c;
+  --merah-lt:   #fee2e2;
+  --kuning:     #b45309;
+  --kuning-lt:  #fef9c3;
+  --ungu:       #5b21b6;
+  --ungu-lt:    #ede9fe;
+  --bg:         #f0f4f9;
+  --surface:    #ffffff;
+  --surface2:   #f5f8fc;
+  --border:     #d1ddf0;
+  --teks:       #172038;
+  --teks-mid:   #3d5280;
+  --teks-muted: #7a8fb0;
+  --mono:       'DM Mono', monospace;
+  --font:       'IBM Plex Sans', sans-serif;
+  --radius:     10px;
+  --shadow:     0 1px 4px rgba(14,50,103,.07), 0 4px 16px rgba(14,50,103,.08);
+  --shadow-lg:  0 8px 32px rgba(14,50,103,.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--teks); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: linear-gradient(135deg, var(--biru-tua) 0%, var(--biru) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 2px 16px rgba(14,50,103,0.28);
+  padding: 0 24px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  position: relative;
+}
+.topbar::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(147,197,253,0.7) 40%, rgba(96,165,250,1) 50%, rgba(147,197,253,0.7) 60%, transparent);
+  background-size: 200% 100%;
+  animation: shimmerLine 3.5s linear infinite;
+}
+@keyframes shimmerLine { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.topbar-brand { display: flex; align-items: center; gap: 11px; }
+.brand-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.brand-icon img { width: 26px; height: 26px; object-fit: contain; border-radius: 4px; }
+.brand-name { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: .01em; }
+.brand-sub  { font-size: 10px; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .08em; margin-top: 1px; }
+
+.topbar-clock {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  text-align: center; pointer-events: none;
+}
+.clock-time { font-family: var(--mono); font-size: 18px; font-weight: 500; color: #fff; letter-spacing: 2px; line-height: 1; }
+.clock-date { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 2px; }
+
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff; border-radius: 7px;
+  padding: 7px 13px; font-size: 12px; font-weight: 600;
+  text-decoration: none; font-family: var(--font);
+  letter-spacing: .03em;
+  transition: background .2s, transform .15s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.18); transform: translateY(-1px); }
+
+/* ── PAGE ── */
+.page { padding: 24px 18px; max-width: 660px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 20px; animation: fadeUp .4s ease .05s both; }
+.page-title {
+  font-family: 'Lora', serif;
+  font-size: 20px; font-weight: 700; color: var(--teks);
+  display: flex; align-items: center; gap: 10px; letter-spacing: -.01em;
+}
+.page-title-icon {
+  width: 38px; height: 38px; background: var(--biru);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: #fff; box-shadow: 0 4px 12px rgba(14,50,103,0.28);
+}
+.page-subtitle { font-size: 12.5px; color: var(--teks-muted); margin-top: 4px; margin-left: 48px; }
+
+/* ── STAT CARDS ── */
+.stat-row {
+  display: grid; grid-template-columns: repeat(3,1fr);
+  gap: 12px; margin-bottom: 18px;
+  animation: fadeUp .4s ease .1s both;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  position: relative; overflow: hidden;
+  transition: transform .2s, box-shadow .2s;
+}
+.stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.stat-card.blue::before  { background: var(--biru); }
+.stat-card.green::before { background: var(--hijau-mid); }
+.stat-card.red::before   { background: var(--merah); }
+
+.stat-icon {
+  width: 32px; height: 32px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; margin-bottom: 9px;
+}
+.stat-icon.blue  { background: var(--biru-lite);  color: var(--biru); }
+.stat-icon.green { background: var(--hijau-lt);   color: var(--hijau-mid); }
+.stat-icon.red   { background: var(--merah-lt);   color: var(--merah); }
+
+.stat-val   { font-size: 24px; font-weight: 700; font-family: var(--mono); line-height: 1; color: var(--teks); }
+.stat-label { font-size: 11px; color: var(--teks-muted); font-weight: 500; margin-top: 3px; }
+
+/* ── TABS ── */
+.tabs {
+  display: flex; gap: 4px; margin-bottom: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px;
+  box-shadow: var(--shadow);
+  animation: fadeUp .4s ease .15s both;
+}
+.tab-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 8px 12px; border-radius: 7px; border: none;
+  background: transparent; color: var(--teks-muted);
+  font-family: var(--font); font-size: 12.5px; font-weight: 600;
+  cursor: pointer; transition: all .18s;
+}
+.tab-btn:hover { background: var(--biru-pale); color: var(--teks); }
+.tab-btn.active { background: var(--biru); color: #fff; box-shadow: 0 3px 10px rgba(14,50,103,0.25); }
+.tab-btn i { font-size: 12px; }
+
+/* ── FILTER ── */
+.filter-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--biru-mid);
+  border-radius: var(--radius);
+  padding: 12px 16px; margin-bottom: 14px;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; flex-wrap: wrap; gap: 10px;
+  animation: fadeUp .4s ease .18s both;
+}
+.filter-label { font-size: 11px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; letter-spacing: .07em; }
+.filter-input {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 7px; color: var(--teks);
+  padding: 6px 11px; font-size: 13px; font-family: var(--font);
+  outline: none; transition: border-color .18s;
+}
+.filter-input:focus { border-color: var(--biru-mid); box-shadow: 0 0 0 3px rgba(37,99,176,.1); }
+.search-wrap { margin-left: auto; position: relative; }
+.search-wrap i { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--teks-muted); pointer-events: none; }
+.search-wrap input {
+  background: var(--surface2); border: 1.5px solid var(--border);
+  border-radius: 7px; color: var(--teks);
+  padding: 6px 11px 6px 28px; font-size: 12px; font-family: var(--font);
+  outline: none; width: 190px; transition: border-color .18s;
+}
+.search-wrap input:focus { border-color: var(--biru-mid); }
+.search-wrap input::placeholder { color: var(--teks-muted); }
+
+/* ── TIMELINE ── */
+.timeline-wrap { display: flex; flex-direction: column; gap: 8px; animation: fadeUp .4s ease .25s both; }
+
+.timeline-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  display: flex; align-items: flex-start; gap: 13px;
+  transition: all .2s; position: relative; overflow: hidden;
+}
+.timeline-item:hover { border-color: rgba(37,99,176,.25); box-shadow: var(--shadow-lg); transform: translateX(3px); }
+.timeline-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.timeline-item.hadir::before    { background: var(--hijau-mid); }
+.timeline-item.terlambat::before { background: var(--merah); }
+
+.tl-icon {
+  width: 38px; height: 38px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.tl-icon.hadir    { background: var(--hijau-lt); color: var(--hijau-mid); }
+.tl-icon.terlambat { background: var(--merah-lt); color: var(--merah); }
+
+.tl-content { flex: 1; min-width: 0; }
+.tl-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.tl-date { font-size: 13px; font-weight: 700; color: var(--teks); }
+
+.badge-hadir {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--hijau-lt); color: var(--hijau);
+  border: 1px solid #bbf7d0; padding: 2px 8px;
+  border-radius: 4px; font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+}
+.badge-terlambat {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--merah-lt); color: var(--merah);
+  border: 1px solid #fecaca; padding: 2px 8px;
+  border-radius: 4px; font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+}
+
+.dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.dot-green  { background: var(--hijau-mid); }
+.dot-red    { background: var(--merah); }
+.dot-yellow { background: var(--kuning); }
+
+.tl-times { display: flex; gap: 8px; flex-wrap: wrap; }
+.time-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 10px; font-size: 12px;
+}
+.time-chip-label { font-size: 10px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; letter-spacing: .05em; }
+.time-chip-val       { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--teks); }
+.time-chip-val.green { color: var(--hijau-mid); }
+.time-chip-val.blue  { color: var(--biru-mid); }
+.time-chip-val.muted { color: var(--teks-muted); font-style: italic; }
+
+.btn-map {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--biru-pale); color: var(--biru-mid);
+  border: 1px solid #bfdbfe; padding: 4px 10px;
+  border-radius: 6px; font-size: 11px; font-weight: 600;
+  text-decoration: none; transition: all .18s; flex-shrink: 0; margin-top: 8px;
+}
+.btn-map:hover { background: var(--biru); color: #fff; transform: translateY(-1px); box-shadow: 0 3px 8px rgba(14,50,103,0.2); }
+
+/* ── IZIN LIST ── */
+.izin-wrap { display: flex; flex-direction: column; gap: 8px; animation: fadeUp .4s ease .25s both; }
+
+.izin-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow);
+  display: flex; align-items: flex-start; gap: 13px;
+  transition: all .2s; position: relative; overflow: hidden;
+}
+.izin-item:hover { box-shadow: var(--shadow-lg); transform: translateX(3px); }
+.izin-item::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; }
+.izin-item.pending::before   { background: var(--kuning); }
+.izin-item.disetujui::before { background: var(--hijau-mid); }
+.izin-item.ditolak::before   { background: var(--merah); }
+
+.izin-icon {
+  width: 38px; height: 38px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.izin-icon.izin-type   { background: var(--biru-lite); color: var(--biru); }
+.izin-icon.sakit-type  { background: var(--merah-lt);  color: var(--merah); }
+.izin-icon.cuti-type   { background: var(--kuning-lt); color: var(--kuning); }
+.izin-icon.kampus-type { background: var(--ungu-lt);   color: var(--ungu); }
+
+.izin-content { flex: 1; min-width: 0; }
+.izin-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 5px; }
+.izin-jenis { font-size: 13px; font-weight: 700; color: var(--teks); }
+
+.badge-pending {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--kuning-lt); color: var(--kuning);
+  border: 1px solid #fde68a; padding: 2px 8px;
+  border-radius: 4px; font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+}
+.badge-disetujui {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--hijau-lt); color: var(--hijau);
+  border: 1px solid #bbf7d0; padding: 2px 8px;
+  border-radius: 4px; font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+}
+.badge-ditolak {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--merah-lt); color: var(--merah);
+  border: 1px solid #fecaca; padding: 2px 8px;
+  border-radius: 4px; font-size: 10.5px; font-weight: 700; flex-shrink: 0;
+}
+
+.izin-date { font-size: 12px; color: var(--teks-muted); font-family: var(--mono); margin-bottom: 4px; }
+.izin-ket  { font-size: 12px; color: var(--teks-muted); line-height: 1.5; }
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center; padding: 52px 20px;
+  color: var(--teks-muted);
+  animation: fadeUp .4s ease .3s both;
+}
+.empty-state i { font-size: 36px; margin-bottom: 11px; display: block; opacity: .3; }
+.empty-state p { font-size: 13px; font-weight: 500; }
+
+/* ── TAB CONTENT ── */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
+.timeline-item:nth-child(1){animation:fadeUp .35s ease .28s both;}
+.timeline-item:nth-child(2){animation:fadeUp .35s ease .33s both;}
+.timeline-item:nth-child(3){animation:fadeUp .35s ease .38s both;}
+.timeline-item:nth-child(4){animation:fadeUp .35s ease .43s both;}
+.timeline-item:nth-child(5){animation:fadeUp .35s ease .48s both;}
+
+@media (max-width: 480px) {
+  .topbar { padding: 0 14px; }
+  .clock-time { font-size: 15px; }
+  .clock-date { display: none; }
+  .page { padding: 14px 12px; }
+  .stat-row { gap: 8px; }
+  .stat-val { font-size: 20px; }
+  .search-wrap input { width: 130px; }
+  .tl-times { gap: 6px; }
+  .tab-btn span { display: none; }
+  .brand-sub { display: none; }
+  .page-subtitle { margin-left: 0; margin-top: 5px; }
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">
+      <img src="/assets/logo-kominfo-demak.jpeg" alt="Logo">
+    </div>
+    <div>
+      <div class="brand-name">SIHADIR</div>
+      <div class="brand-sub">{{ if eq .role "magang" }}Dashboard Magang{{ else }}Dashboard Pegawai{{ end }}</div>
+    </div>
+  </div>
+  <div class="topbar-clock">
+    <div class="clock-time" id="clock-time">00:00:00</div>
+    <div class="clock-date" id="clock-date">—</div>
+  </div>
+  <a href="{{ if eq .role "magang" }}/magang{{ else }}/pegawai{{ end }}" class="btn-back">
+    <i class="fa-solid fa-arrow-left"></i> Kembali
+  </a>
+</header>
+
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">
+      <div class="page-title-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      Riwayat
+    </div>
+    <div class="page-subtitle">Rekap kehadiran dan pengajuan izin kamu</div>
+  </div>
+
+  <!-- STAT CARDS -->
+  <div class="stat-row">
+    <div class="stat-card blue">
+      <div class="stat-icon blue"><i class="fa-solid fa-calendar-days"></i></div>
+      <div class="stat-val" id="stat-total">—</div>
+      <div class="stat-label">Total Hari</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div>
+      <div class="stat-val" id="stat-hadir">—</div>
+      <div class="stat-label">Hadir</div>
+    </div>
+    <div class="stat-card red">
+      <div class="stat-icon red"><i class="fa-solid fa-clock"></i></div>
+      <div class="stat-val" id="stat-terlambat">—</div>
+      <div class="stat-label">Terlambat</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('presensi', this)">
+      <i class="fa-solid fa-list-check"></i>
+      <span>Presensi</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('izin', this)">
+      <i class="fa-solid fa-file-alt"></i>
+      <span>Izin</span>
+      <span id="izin-badge" style="background:var(--kuning);color:#fff;border-radius:4px;padding:1px 7px;font-size:10px;font-weight:700;display:none"></span>
+    </button>
+  </div>
+
+  <!-- TAB PRESENSI -->
+  <div class="tab-content active" id="tab-presensi">
+    <div class="filter-card">
+      <span class="filter-label"><i class="fa-regular fa-calendar" style="margin-right:5px"></i>Bulan</span>
+      <input type="month" class="filter-input" id="filter-bulan" onchange="applyFilter()">
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" placeholder="Cari tanggal..." oninput="applySearch(this.value)">
+      </div>
+    </div>
+
+    <div class="timeline-wrap" id="timeline">
+      {{ range .data }}
+      <div class="timeline-item {{ if eq .Status "Hadir" }}hadir{{ else }}terlambat{{ end }}"
+           data-tanggal="{{ .Tanggal }}">
+        <div class="tl-icon {{ if eq .Status "Hadir" }}hadir{{ else }}terlambat{{ end }}">
+          {{ if eq .Status "Hadir" }}
+            <i class="fa-solid fa-circle-check"></i>
+          {{ else }}
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          {{ end }}
+        </div>
+        <div class="tl-content">
+          <div class="tl-top">
+            <div class="tl-date">{{ .Tanggal }}</div>
+            {{ if eq .Status "Hadir" }}
+              <span class="badge-hadir"><span class="dot dot-green"></span> Hadir</span>
+            {{ else }}
+              <span class="badge-terlambat"><span class="dot dot-red"></span> Terlambat</span>
+            {{ end }}
+          </div>
+          <div class="tl-times">
+            <div class="time-chip">
+              <div>
+                <div class="time-chip-label">Masuk</div>
+                <div class="time-chip-val green">{{ .JamMasuk }}</div>
+              </div>
+            </div>
+            <div class="time-chip">
+              <div>
+                <div class="time-chip-label">Pulang</div>
+                {{ if .JamPulang }}
+                  <div class="time-chip-val blue">{{ .JamPulang }}</div>
+                {{ else }}
+                  <div class="time-chip-val muted">—</div>
+                {{ end }}
+              </div>
+            </div>
+          </div>
+          <a href="https://www.google.com/maps?q={{ .Latitude }},{{ .Longitude }}"
+             target="_blank" class="btn-map">
+            <i class="fa-solid fa-map-location-dot"></i> Lihat Lokasi
+          </a>
+        </div>
+      </div>
+      {{ end }}
+    </div>
+
+    {{ if not .data }}
+    <div class="empty-state">
+      <i class="fa-solid fa-calendar-xmark"></i>
+      <p>Belum ada data presensi.</p>
+    </div>
+    {{ end }}
+  </div>
+
+  <!-- TAB IZIN -->
+  <div class="tab-content" id="tab-izin">
+    <div class="izin-wrap">
+      {{ range .izin }}
+      <div class="izin-item {{ if eq .Status "Pending" }}pending{{ else if eq .Status "Disetujui" }}disetujui{{ else }}ditolak{{ end }}">
+        <div class="izin-icon
+          {{ if eq .Jenis "Sakit" }}sakit-type
+          {{ else if eq .Jenis "Cuti" }}cuti-type
+          {{ else if eq .Jenis "Keperluan Kampus" }}kampus-type
+          {{ else }}izin-type{{ end }}">
+          {{ if eq .Jenis "Sakit" }}
+            <i class="fa-solid fa-briefcase-medical"></i>
+          {{ else if eq .Jenis "Cuti" }}
+            <i class="fa-solid fa-calendar-check"></i>
+          {{ else if eq .Jenis "Keperluan Kampus" }}
+            <i class="fa-solid fa-graduation-cap"></i>
+          {{ else }}
+            <i class="fa-solid fa-file-alt"></i>
+          {{ end }}
+        </div>
+        <div class="izin-content">
+          <div class="izin-top">
+            <div class="izin-jenis">{{ .Jenis }}</div>
+            {{ if eq .Status "Pending" }}
+              <span class="badge-pending"><span class="dot dot-yellow"></span> Menunggu</span>
+            {{ else if eq .Status "Disetujui" }}
+              <span class="badge-disetujui"><span class="dot dot-green"></span> Disetujui</span>
+            {{ else }}
+              <span class="badge-ditolak"><span class="dot dot-red"></span> Ditolak</span>
+            {{ end }}
+          </div>
+          <div class="izin-date"><i class="fa-regular fa-calendar" style="margin-right:4px"></i>{{ .Tanggal }}</div>
+          {{ if .Keterangan }}
+          <div class="izin-ket">{{ .Keterangan }}</div>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}
+    </div>
+
+    {{ if not .izin }}
+    <div class="empty-state">
+      <i class="fa-solid fa-folder-open"></i>
+      <p>Belum ada riwayat pengajuan izin.</p>
+    </div>
+    {{ end }}
+  </div>
+
+</div>
+
+<script>
+function updateClock(){
+  const now=new Date(),days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  document.getElementById('clock-time').textContent=now.toLocaleTimeString('id-ID',{hour12:false})
+  document.getElementById('clock-date').textContent=days[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear()
+}
+setInterval(updateClock,1000);updateClock()
+
+const items=Array.from(document.querySelectorAll('.timeline-item'))
+let hadir=0,terlambat=0
+items.forEach(i=>{if(i.classList.contains('hadir'))hadir++;else terlambat++})
+document.getElementById('stat-total').textContent=items.length
+document.getElementById('stat-hadir').textContent=hadir
+document.getElementById('stat-terlambat').textContent=terlambat
+
+const pendingCount=document.querySelectorAll('.izin-item.pending').length
+if(pendingCount>0){
+  const badge=document.getElementById('izin-badge')
+  badge.textContent=pendingCount
+  badge.style.display='inline'
+}
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'))
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'))
+  document.getElementById('tab-'+tab).classList.add('active')
+  btn.classList.add('active')
+}
+
+let activeSearch=''
+function applyFilter(){
+  const bulan=document.getElementById('filter-bulan').value
+  items.forEach(item=>{
+    const tgl=item.dataset.tanggal||''
+    const matchBulan=!bulan||tgl.startsWith(bulan)
+    const matchSearch=!activeSearch||tgl.includes(activeSearch)
+    item.style.display=(matchBulan&&matchSearch)?'':'none'
+  })
+}
+function applySearch(q){activeSearch=q.toLowerCase();applyFilter()}
+</script>
+</body>
+</html>

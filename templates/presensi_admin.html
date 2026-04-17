@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoring Presensi — Sistem Presensi</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --sidebar-w: 248px;
+  --navy:      #1a3d6e;
+  --navy-dk:   #122b50;
+  --navy-md:   #2155a0;
+  --navy-lt:   #e8f0fb;
+  --gov-accent:#2e7dcc;
+  --bg:        #f0f2f5;
+  --surface:   #ffffff;
+  --surface2:  #f7f9fc;
+  --border:    #d9e0ea;
+  --green:     #1b6b35;
+  --green-lt:  #e2f4e9;
+  --red:       #b52020;
+  --red-lt:    #fce8e8;
+  --yellow:    #8a5c00;
+  --yellow-lt: #fef8e6;
+  --blue:      #1a3d6e;
+  --blue-lt:   #e8f0fb;
+  --text:      #1c2b3a;
+  --muted:     #718096;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow:    0 1px 4px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.05);
+  --font:   'Noto Sans', sans-serif;
+  --mono:   'DM Mono', monospace;
+  --radius: 6px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); display:flex; min-height:100vh; font-size:13px; }
+
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; }
+.overlay.show { display:block; }
+
+/* ════ SIDEBAR ════ */
+.sidebar { width:var(--sidebar-w); background:var(--navy-dk); display:flex; flex-direction:column; position:fixed; top:0; left:0; height:100vh; z-index:300; transition:transform 0.25s ease; }
+.sidebar-brand { background:var(--navy); padding:12px 14px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:10px; min-height:66px; }
+.brand-logo { width:42px; height:42px; background:#fff; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+.brand-logo img { width:100%; height:100%; object-fit:contain; padding:3px; }
+.brand-name { font-size:12px; font-weight:700; color:#fff; line-height:1.3; }
+.brand-sub  { font-size:9.5px; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
+.sidebar-nav { padding:8px; flex:1; overflow-y:auto; }
+.nav-group-label { font-size:9px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:rgba(255,255,255,0.3); padding:10px 10px 4px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:4px; color:rgba(255,255,255,0.65); text-decoration:none; font-size:12.5px; font-weight:500; transition:all 0.12s; margin-bottom:1px; }
+.nav-item i { width:15px; text-align:center; font-size:12px; flex-shrink:0; }
+.nav-item:hover { background:rgba(255,255,255,0.08); color:#fff; }
+.nav-item.active { background:var(--gov-accent); color:#fff; font-weight:600; }
+.nav-item.logout { color:rgba(255,150,150,0.8); margin-top:2px; }
+.nav-item.logout:hover { background:rgba(220,50,50,0.15); color:#ff9999; }
+.nav-sep { height:1px; background:rgba(255,255,255,0.07); margin:6px 8px; }
+.sidebar-footer { padding:10px 8px; border-top:1px solid rgba(255,255,255,0.08); background:rgba(0,0,0,0.15); }
+.user-card { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:4px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); margin-bottom:6px; }
+.user-avatar { width:28px; height:28px; border-radius:4px; background:var(--gov-accent); display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; flex-shrink:0; }
+.user-name { font-size:11.5px; font-weight:600; color:#fff; }
+.user-role { font-size:9.5px; color:rgba(255,255,255,0.4); }
+
+/* ════ MAIN ════ */
+.main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.topbar { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; height:54px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:var(--shadow-sm); }
+.topbar-left { display:flex; align-items:center; gap:10px; }
+.hamburger { display:none; width:32px; height:32px; border:1px solid var(--border); border-radius:4px; background:var(--surface2); color:var(--muted); align-items:center; justify-content:center; cursor:pointer; font-size:13px; transition:0.12s; flex-shrink:0; }
+.hamburger:hover { color:var(--navy); border-color:var(--navy); }
+.page-title { font-size:14px; font-weight:700; color:var(--navy); }
+.breadcrumb-text { font-size:10.5px; color:var(--muted); margin-top:1px; }
+.topbar-center { position:absolute; left:50%; transform:translateX(-50%); text-align:center; pointer-events:none; }
+.clock-time { font-family:var(--mono); font-size:17px; font-weight:500; color:var(--navy); letter-spacing:2px; line-height:1; }
+.clock-date { font-size:10px; color:var(--muted); margin-top:2px; }
+.topbar-right { display:flex; align-items:center; gap:6px; }
+.icon-btn { width:32px; height:32px; border-radius:4px; background:var(--surface2); border:1px solid var(--border); color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; transition:0.12s; text-decoration:none; }
+.icon-btn.danger:hover { color:var(--red); border-color:#e8a0a0; background:var(--red-lt); }
+
+/* ════ CONTENT ════ */
+.content { padding:20px 24px; flex:1; }
+.section-title { font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--navy); margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid var(--navy-lt); display:flex; align-items:center; gap:8px; }
+.section-title i { font-size:12px; color:var(--gov-accent); }
+
+/* STAT CARDS */
+.stat-cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:20px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow-sm); transition:box-shadow 0.15s; }
+.stat-card:hover { box-shadow:var(--shadow); }
+.stat-card.blue   { border-left-color:var(--navy-md); }
+.stat-card.green  { border-left-color:var(--green); }
+.stat-card.red    { border-left-color:var(--red); }
+.stat-card.yellow { border-left-color:#c47a00; }
+.stat-card-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.stat-icon { width:38px; height:38px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:16px; }
+.stat-icon.blue   { background:var(--navy-lt);   color:var(--navy-md); }
+.stat-icon.green  { background:var(--green-lt);  color:var(--green); }
+.stat-icon.red    { background:var(--red-lt);    color:var(--red); }
+.stat-icon.yellow { background:var(--yellow-lt); color:var(--yellow); }
+.stat-badge { font-size:9px; font-weight:600; padding:2px 7px; border-radius:3px; letter-spacing:0.3px; text-transform:uppercase; border:1px solid; }
+.stat-badge.blue   { background:var(--navy-lt);   color:var(--navy-md); border-color:#b8cee8; }
+.stat-badge.green  { background:var(--green-lt);  color:var(--green);   border-color:#a8d8b8; }
+.stat-badge.red    { background:var(--red-lt);    color:var(--red);     border-color:#e8b0b0; }
+.stat-badge.yellow { background:var(--yellow-lt); color:var(--yellow);  border-color:#e8d080; }
+.stat-value { font-size:32px; font-weight:700; font-family:var(--mono); line-height:1; margin-bottom:3px; }
+.stat-label { font-size:11.5px; color:var(--muted); font-weight:500; }
+
+/* FILTER */
+.filter-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 18px; margin-bottom:16px; box-shadow:var(--shadow-sm); display:flex; align-items:center; flex-wrap:wrap; gap:10px; }
+.filter-label { font-size:11px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; white-space:nowrap; }
+.filter-input { background:var(--surface2); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:7px 12px; font-size:12.5px; font-family:var(--font); outline:none; transition:border-color 0.15s; min-width:160px; }
+.filter-input:focus { border-color:var(--navy); box-shadow:0 0 0 2px rgba(26,61,110,0.1); }
+.btn-filter { background:var(--navy); color:#fff; border:none; border-radius:4px; padding:8px 16px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:var(--font); display:inline-flex; align-items:center; gap:6px; transition:all 0.15s; }
+.btn-filter:hover { background:var(--navy-md); }
+.btn-reset { background:var(--surface2); color:var(--muted); border:1px solid var(--border); border-radius:4px; padding:8px 16px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:var(--font); text-decoration:none; display:inline-flex; align-items:center; gap:6px; transition:all 0.15s; }
+.btn-reset:hover { background:var(--border); color:var(--text); }
+.btn-export { background:var(--green-lt); color:var(--green); border:1px solid #a8d8b8; border-radius:4px; padding:8px 16px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:var(--font); text-decoration:none; display:inline-flex; align-items:center; gap:6px; margin-left:auto; transition:all 0.15s; }
+.btn-export:hover { background:#a8d8b8; }
+
+/* TABLE */
+.table-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); }
+.table-card-header { padding:13px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; flex-wrap:wrap; background:var(--surface2); }
+.table-card-title { font-size:12.5px; font-weight:700; color:var(--navy); }
+.table-count { font-size:10px; font-weight:700; background:var(--navy-lt); color:var(--navy-md); border:1px solid #b8cee8; padding:2px 8px; border-radius:3px; text-transform:uppercase; letter-spacing:0.3px; }
+.search-wrap { margin-left:auto; position:relative; }
+.search-wrap i { position:absolute; left:10px; top:50%; transform:translateY(-50%); font-size:12px; color:var(--muted); pointer-events:none; }
+.search-wrap input { background:var(--surface); border:1px solid var(--border); border-radius:4px; color:var(--text); padding:6px 11px 6px 28px; font-size:12.5px; font-family:var(--font); outline:none; width:210px; transition:border-color 0.15s; }
+.search-wrap input:focus { border-color:var(--navy); }
+.search-wrap input::placeholder { color:var(--muted); }
+
+table { width:100%; border-collapse:collapse; }
+thead tr { background:var(--surface2); }
+th { padding:10px 16px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color:var(--muted); text-align:left; border-bottom:1px solid var(--border); white-space:nowrap; }
+tbody tr { border-bottom:1px solid var(--border); transition:background 0.12s; }
+tbody tr:last-child { border-bottom:none; }
+tbody tr:hover { background:var(--surface2); }
+td { padding:11px 16px; font-size:13px; vertical-align:middle; }
+
+.td-name { display:flex; align-items:center; gap:9px; }
+.td-avatar { width:30px; height:30px; border-radius:4px; background:var(--navy); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; color:#fff; }
+.td-name-text { font-weight:600; }
+.td-date  { font-family:var(--mono); font-size:12px; color:var(--muted); }
+.td-time  { font-family:var(--mono); font-size:12.5px; font-weight:500; }
+.time-masuk  { color:var(--green); }
+.time-pulang { color:var(--navy); }
+.time-empty  { color:#c4cad8; font-style:italic; font-family:var(--font); font-size:12px; }
+.td-num { font-family:var(--mono); font-size:11.5px; color:var(--muted); }
+
+.badge-hadir     { display:inline-flex; align-items:center; gap:5px; background:var(--green-lt); color:var(--green); border:1px solid #a8d8b8; padding:3px 9px; border-radius:3px; font-size:11px; font-weight:700; }
+.badge-terlambat { display:inline-flex; align-items:center; gap:5px; background:var(--red-lt);   color:var(--red);   border:1px solid #e8b0b0; padding:3px 9px; border-radius:3px; font-size:11px; font-weight:700; }
+.dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+.dot-green { background:var(--green); }
+.dot-red   { background:var(--red); }
+
+.btn-map { display:inline-flex; align-items:center; gap:5px; background:var(--navy-lt); color:var(--navy); border:1px solid #b8cee8; padding:4px 10px; border-radius:4px; font-size:11.5px; font-weight:600; text-decoration:none; transition:all 0.15s; }
+.btn-map:hover { background:var(--navy); color:#fff; transform:translateY(-1px); }
+
+.empty-state { text-align:center; padding:48px 20px; color:var(--muted); }
+.empty-state i { font-size:32px; margin-bottom:10px; display:block; opacity:0.35; }
+.empty-state p { font-size:13px; font-weight:500; }
+
+/* FOTO MODAL */
+.foto-modal-overlay { position:fixed; inset:0; background:rgba(10,14,26,0.7); backdrop-filter:blur(4px); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; opacity:0; pointer-events:none; transition:opacity 0.25s; }
+.foto-modal-overlay.show { opacity:1; pointer-events:all; }
+.foto-modal-card { background:var(--surface); border-radius:var(--radius); overflow:hidden; max-width:420px; width:100%; box-shadow:0 24px 64px rgba(10,14,26,0.35); transform:scale(0.92); transition:transform 0.3s cubic-bezier(.34,1.56,.64,1); border-top:3px solid var(--navy); }
+.foto-modal-overlay.show .foto-modal-card { transform:scale(1); }
+.foto-modal-header { padding:12px 16px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border); background:var(--surface2); }
+.foto-modal-title { font-size:13px; font-weight:700; color:var(--navy); }
+.foto-modal-close { width:28px; height:28px; border-radius:4px; background:var(--surface); border:1px solid var(--border); color:var(--muted); cursor:pointer; font-size:12px; display:flex; align-items:center; justify-content:center; transition:0.15s; }
+.foto-modal-close:hover { background:var(--red-lt); color:var(--red); border-color:#e8a0a0; }
+.foto-modal-img { width:100%; display:block; max-height:400px; object-fit:cover; }
+
+/* FOTO THUMBNAIL */
+.foto-thumb { width:38px; height:38px; object-fit:cover; border-radius:4px; cursor:pointer; border:1px solid var(--border); transition:0.15s; }
+.foto-thumb:hover { transform:scale(1.08); border-color:var(--navy); }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+.stat-cards  { animation:fadeIn 0.3s ease 0.05s both; }
+.filter-card { animation:fadeIn 0.3s ease 0.12s both; }
+.table-card  { animation:fadeIn 0.3s ease 0.18s both; }
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);box-shadow:2px 0 20px rgba(0,0,0,0.2);}
+  .main{margin-left:0;}.hamburger{display:flex;}
+  .stat-cards{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+  .stat-cards{grid-template-columns:1fr 1fr;gap:8px;}
+  .content{padding:14px 12px;}.topbar{padding:0 12px;}
+  .page-title{font-size:13px;}.breadcrumb-text{display:none;}
+  .stat-value{font-size:24px;}.topbar-center{display:none;}
+  .filter-card{flex-direction:column;align-items:stretch;}
+  .filter-input,.btn-filter,.btn-reset,.btn-export{width:100%;justify-content:center;margin-left:0!important;}
+  .table-card-header{flex-direction:column;align-items:stretch;gap:8px;}
+  .search-wrap{margin-left:0;width:100%;}
+  .search-wrap input{width:100%!important;}
+  .table-card{overflow-x:auto;}table{min-width:580px;}
+}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="/assets/logo-kominfo-demak.jpeg" alt="Logo"></div>
+    <div><div class="brand-name">Dinkominfo Demak</div><div class="brand-sub">Admin Panel</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Menu Utama</div>
+    <a href="/admin" class="nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+    <div class="nav-sep"></div>
+    <div class="nav-group-label">Manajemen</div>
+    <a href="/admin/presensi" class="nav-item active"><i class="fa-solid fa-list-check"></i> Monitoring Presensi</a>
+    <a href="/admin/logbook" class="nav-item"><i class="fa-solid fa-book-open"></i> Logbook Magang</a>
+    <a href="/admin/izin" class="nav-item"><i class="fa-solid fa-file-circle-check"></i> Pengajuan Izin</a>
+    <a href="/admin/users" class="nav-item"><i class="fa-solid fa-users-gear"></i> Manajemen User</a>
+    <div class="nav-sep"></div>
+    <div class="nav-group-label">Konfigurasi</div>
+    <a href="/admin/setting" class="nav-item"><i class="fa-solid fa-clock-rotate-left"></i> Waktu &amp; Lokasi</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar"><i class="fa-solid fa-user-shield"></i></div>
+      <div><div class="user-name">Administrator</div><div class="user-role">Admin Sistem</div></div>
+    </div>
+    <a href="/logout" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" id="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div>
+      <div><div class="page-title">Monitoring Presensi</div><div class="breadcrumb-text">Manajemen &rarr; Monitoring Presensi</div></div>
+    </div>
+    <div class="topbar-center">
+      <div class="clock-time" id="clock-time">00:00:00</div>
+      <div class="clock-date" id="clock-date">&mdash;</div>
+    </div>
+    <div class="topbar-right">
+      <a href="/logout" class="icon-btn danger" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <div class="section-title"><i class="fa-solid fa-chart-simple"></i> Ringkasan Kehadiran</div>
+    <div class="stat-cards">
+      <div class="stat-card blue">
+        <div class="stat-card-top"><div class="stat-icon blue"><i class="fa-solid fa-users"></i></div><span class="stat-badge blue">Total</span></div>
+        <div class="stat-value">{{ .total }}</div><div class="stat-label">Total Karyawan</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-card-top"><div class="stat-icon green"><i class="fa-solid fa-circle-check"></i></div><span class="stat-badge green">Tepat Waktu</span></div>
+        <div class="stat-value">{{ .hadir }}</div><div class="stat-label">Hadir</div>
+      </div>
+      <div class="stat-card red">
+        <div class="stat-card-top"><div class="stat-icon red"><i class="fa-solid fa-clock"></i></div><span class="stat-badge red">Perlu Perhatian</span></div>
+        <div class="stat-value">{{ .terlambat }}</div><div class="stat-label">Terlambat</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-card-top"><div class="stat-icon yellow"><i class="fa-solid fa-calendar-xmark"></i></div><span class="stat-badge yellow">Tidak Hadir</span></div>
+        <div class="stat-value">{{ .izin }}</div><div class="stat-label">Izin / Absen</div>
+      </div>
+    </div>
+
+    <div class="section-title"><i class="fa-solid fa-filter"></i> Filter Data</div>
+    <form method="GET" action="/admin/presensi" class="filter-card">
+      <span class="filter-label">Tanggal</span>
+      <input type="date" name="date" class="filter-input" value="{{ .date }}">
+      <button type="submit" class="btn-filter"><i class="fa-solid fa-magnifying-glass"></i> Tampilkan</button>
+      <a href="/admin/presensi" class="btn-reset"><i class="fa-solid fa-rotate-left"></i> Reset</a>
+      <a href="/admin/export-presensi" class="btn-export"><i class="fa-solid fa-file-excel"></i> Export Excel</a>
+    </form>
+
+    <div class="section-title"><i class="fa-solid fa-table-list"></i> Data Kehadiran</div>
+    <div class="table-card">
+      <div class="table-card-header">
+        <span class="table-card-title">Daftar Presensi</span>
+        <span class="table-count" id="row-count">— records</span>
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" placeholder="Cari nama..." oninput="filterTable(this.value)">
+        </div>
+      </div>
+      <table id="presensi-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Nama</th>
+            <th>Tanggal</th>
+            <th>Jam Masuk</th>
+            <th>Jam Pulang</th>
+            <th>Status</th>
+            <th>Foto</th>
+            <th>Lokasi</th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+          {{ range $i, $v := .data }}
+          <tr>
+            <td class="td-num">{{ addOne $i }}</td>
+            <td>
+              <div class="td-name">
+                <div class="td-avatar">{{ slice .Nama 0 1 }}</div>
+                <span class="td-name-text">{{ .Nama }}</span>
+              </div>
+            </td>
+            <td><span class="td-date">{{ .Tanggal }}</span></td>
+            <td><span class="td-time time-masuk"><i class="fa-regular fa-clock"></i> {{ .JamMasuk }}</span></td>
+            <td>
+              {{ if .JamPulang }}
+                <span class="td-time time-pulang"><i class="fa-regular fa-clock"></i> {{ .JamPulang }}</span>
+              {{ else }}
+                <span class="time-empty">Belum Pulang</span>
+              {{ end }}
+            </td>
+            <td>
+              {{ if eq .Status "Hadir" }}
+                <span class="badge-hadir"><span class="dot dot-green"></span> Hadir</span>
+              {{ else }}
+                <span class="badge-terlambat"><span class="dot dot-red"></span> Terlambat</span>
+              {{ end }}
+            </td>
+            <td>
+              {{ if .Foto }}
+                <img src="/uploads/{{ .Foto }}"
+                  onclick="lihatFoto('/uploads/{{ .Foto }}', '{{ .Nama }}')"
+                  class="foto-thumb"
+                  title="Klik untuk perbesar">
+              {{ else }}
+                <span style="font-size:11px;color:var(--muted);font-style:italic;">—</span>
+              {{ end }}
+            </td>
+            <td>
+              <a href="https://www.google.com/maps?q={{ .Latitude }},{{ .Longitude }}" target="_blank" class="btn-map">
+                <i class="fa-solid fa-map-location-dot"></i> Peta
+              </a>
+            </td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+      {{ if not .data }}
+      <div class="empty-state"><i class="fa-solid fa-inbox"></i><p>Tidak ada data presensi untuk tanggal ini.</p></div>
+      {{ end }}
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL FOTO -->
+<div class="foto-modal-overlay" id="foto-modal" onclick="tutupFoto(event)">
+  <div class="foto-modal-card">
+    <div class="foto-modal-header">
+      <div class="foto-modal-title" id="foto-modal-nama">Foto Presensi</div>
+      <button class="foto-modal-close" onclick="tutupFoto()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <img class="foto-modal-img" id="foto-modal-img" src="" alt="Foto Presensi">
+  </div>
+</div>
+
+<script>
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show');document.body.style.overflow='hidden';}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');document.body.style.overflow='';}
+
+function updateClock(){
+  const now=new Date(),days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  document.getElementById('clock-time').textContent=now.toLocaleTimeString('id-ID',{hour12:false});
+  document.getElementById('clock-date').textContent=days[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+}
+setInterval(updateClock,1000);updateClock();
+
+const rows=document.querySelectorAll('#table-body tr');
+document.getElementById('row-count').textContent=rows.length+' records';
+
+function filterTable(q){
+  const lq=q.toLowerCase();let visible=0;
+  rows.forEach(r=>{
+    const name=r.querySelector('.td-name-text')?.textContent.toLowerCase()||'';
+    const show=name.includes(lq);
+    r.style.display=show?'':'none';if(show)visible++;
+  });
+  document.getElementById('row-count').textContent=visible+' records';
+}
+
+function lihatFoto(src,nama){
+  document.getElementById('foto-modal-img').src=src;
+  document.getElementById('foto-modal-nama').textContent='Foto — '+nama;
+  document.getElementById('foto-modal').classList.add('show');
+}
+function tutupFoto(e){
+  if(!e||e.target===document.getElementById('foto-modal')){
+    document.getElementById('foto-modal').classList.remove('show');
+  }
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')tutupFoto();});
+</script>
+</body>
+</html>

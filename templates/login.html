@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<title>SIHADIR — Sistem Informasi Kehadiran | Dinkominfo Kab. Demak</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --biru:        #1a4d8f;
+  --biru-tua:    #0e3267;
+  --biru-mid:    #2563b0;
+  --biru-lite:   #dbeafe;
+  --biru-glow:   rgba(37,99,176,0.18);
+  --biru-glow2:  rgba(96,165,250,0.12);
+  --abu-bg:      #f0f4f9;
+  --putih:       #ffffff;
+  --border:      #c8d8ee;
+  --border-hi:   rgba(37,99,176,0.4);
+  --teks:        #172038;
+  --teks-mid:    #475d80;
+  --teks-muted:  #8899bb;
+  --shadow:      0 20px 60px rgba(14,50,103,.14), 0 4px 16px rgba(14,50,103,.08);
+}
+
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body { height:100%; font-family:'Plus Jakarta Sans',sans-serif; color:var(--teks); overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+
+body {
+  background: var(--abu-bg);
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 30% 20%, rgba(37,99,176,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 50% at 80% 80%, rgba(96,165,250,0.07) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(rgba(37,99,176,0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+  animation: blobDrift ease-in-out infinite alternate;
+}
+.blob-1 {
+  width: 380px; height: 380px;
+  background: rgba(37,99,176,0.09);
+  top: -80px; left: -80px;
+  animation-duration: 12s;
+}
+.blob-2 {
+  width: 280px; height: 280px;
+  background: rgba(96,165,250,0.08);
+  bottom: -60px; right: -60px;
+  animation-duration: 16s;
+  animation-delay: -4s;
+}
+.blob-3 {
+  width: 200px; height: 200px;
+  background: rgba(14,50,103,0.06);
+  top: 50%; right: 10%;
+  animation-duration: 9s;
+  animation-delay: -2s;
+}
+@keyframes blobDrift {
+  from { transform: translate(0,0) scale(1); }
+  to   { transform: translate(20px,18px) scale(1.08); }
+}
+
+.top-header {
+  position: relative; z-index: 10;
+  background: linear-gradient(135deg, var(--biru-tua) 0%, var(--biru) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 2px 16px rgba(14,50,103,0.25);
+  padding: 0 2rem;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.top-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(147,197,253,0.6) 30%,
+    rgba(96,165,250,0.9) 50%,
+    rgba(147,197,253,0.6) 70%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerLine 3.5s linear infinite;
+}
+@keyframes shimmerLine {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+.th-left { display:flex; align-items:center; gap:11px; padding:10px 0; }
+.th-seal {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  backdrop-filter: blur(8px);
+}
+.th-prov     { font-size:.58rem; font-weight:500; letter-spacing:.1em; text-transform:uppercase; color:rgba(255,255,255,.45); margin-bottom:1px; }
+.th-instansi { font-size:.78rem; font-weight:700; color:#fff; letter-spacing:.01em; }
+.th-right    { font-size:.62rem; color:rgba(255,255,255,.3); letter-spacing:.05em; padding:10px 0; }
+
+.page-body {
+  position: relative; z-index: 5;
+  min-height: calc(100vh - 54px - 42px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+}
+
+.login-card {
+  background: rgba(255,255,255,0.82);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,0.9);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.9);
+  width: 100%; max-width: 440px;
+  overflow: hidden;
+  animation: cardIn .65s cubic-bezier(.22,1,.36,1) both;
+  position: relative;
+}
+@keyframes cardIn {
+  from { opacity:0; transform:translateY(28px) scale(.98); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+.card-accent {
+  height: 4px;
+  background: linear-gradient(90deg,
+    var(--biru-tua), var(--biru-mid), #60a5fa, var(--biru-mid), var(--biru-tua)
+  );
+  background-size: 300% 100%;
+  animation: barFlow 4s linear infinite;
+}
+@keyframes barFlow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 300% 0%; }
+}
+
+.card-header {
+  padding: 1.9rem 2.2rem 1.5rem;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(219,234,254,0.55) 0%, rgba(255,255,255,0) 100%);
+  border-bottom: 1px solid rgba(200,216,238,0.6);
+}
+
+.header-logo-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 14px; margin-bottom: 1.1rem;
+}
+
+.logo-circle {
+  width: 56px; height: 56px; border-radius: 14px;
+  background: linear-gradient(135deg, var(--biru) 0%, var(--biru-tua) 100%);
+  border: 2px solid rgba(37,99,176,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; flex-shrink: 0;
+  box-shadow: 0 6px 20px rgba(14,50,103,0.3), inset 0 1px 0 rgba(255,255,255,0.15);
+  animation: logoBreathe 4s ease-in-out infinite;
+}
+@keyframes logoBreathe {
+  0%,100% { box-shadow: 0 6px 20px rgba(14,50,103,.3), inset 0 1px 0 rgba(255,255,255,.15); }
+  50%      { box-shadow: 0 8px 28px rgba(37,99,176,.45), inset 0 1px 0 rgba(255,255,255,.15); }
+}
+
+.logo-kop { text-align:left; }
+.logo-kab  { font-size:.58rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--teks-muted); margin-bottom:2px; }
+.logo-dinas { font-family:'Lora',serif; font-size:1rem; font-weight:700; color:var(--biru-tua); line-height:1.25; }
+.logo-dinas-sub { font-size:.6rem; color:var(--teks-muted); margin-top:1px; font-weight:400; }
+
+.ornament-rule { display:flex; align-items:center; gap:8px; margin:0 auto; width:fit-content; }
+.orn-l { width:28px; height:1px; background:linear-gradient(90deg,transparent,var(--border)); }
+.orn-l.rev { background:linear-gradient(90deg,var(--border),transparent); }
+.orn-d { width:5px; height:5px; background:var(--biru-mid); transform:rotate(45deg); opacity:.35; }
+
+.sys-label { font-size:.58rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--biru-mid); margin-top:.85rem; margin-bottom:.2rem; }
+.sys-title { font-family:'Lora',serif; font-size:1.65rem; font-weight:700; color:var(--biru-tua); letter-spacing:-.01em; }
+.sys-desc  { font-size:.7rem; color:var(--teks-muted); margin-top:3px; }
+
+.card-body { padding:1.7rem 2.2rem 2rem; }
+
+.form-section-label {
+  display:flex; align-items:center; gap:8px; margin-bottom:1.3rem;
+}
+.fsl-line { flex:1; height:1px; background:var(--border); }
+.fsl-text  { font-size:.6rem; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--teks-muted); white-space:nowrap; }
+
+.field { margin-bottom:1.05rem; }
+.field-lbl { display:block; font-size:.71rem; font-weight:600; letter-spacing:.04em; color:var(--teks-mid); margin-bottom:5px; }
+
+.input-wrap { position:relative; }
+.field-input {
+  width:100%;
+  background: rgba(255,255,255,0.7);
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  padding: 11px 12px 11px 38px;
+  font-family: 'Plus Jakarta Sans',sans-serif;
+  font-size: .875rem; font-weight:400; color:var(--teks);
+  outline: none;
+  transition: border-color .25s, box-shadow .25s, background .25s;
+}
+.field-input::placeholder { color:#b5c4dc; }
+.field-input:focus {
+  border-color: var(--biru-mid);
+  background: #fff;
+  box-shadow: 0 0 0 3.5px rgba(37,99,176,0.12);
+}
+
+.fi-ic {
+  position:absolute; left:12px; top:50%; transform:translateY(-50%);
+  color:#b5c4dc; font-size:.76rem; pointer-events:none; transition:color .25s;
+}
+.input-wrap:focus-within .fi-ic { color:var(--biru-mid); }
+
+.pw-btn {
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  background:none; border:none; color:#b5c4dc; cursor:pointer;
+  font-size:.76rem; padding:4px; transition:color .2s;
+}
+.pw-btn:hover { color:var(--biru-mid); }
+
+.btn-masuk {
+  width:100%; padding:12px; margin-top:.5rem;
+  background: linear-gradient(135deg, var(--biru-mid) 0%, var(--biru-tua) 100%);
+  color:#fff; border:none; border-radius:9px;
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:.87rem; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  cursor:pointer; position:relative; overflow:hidden;
+  transition: transform .2s, box-shadow .25s;
+  box-shadow: 0 4px 16px rgba(14,50,103,0.28);
+}
+.btn-masuk::before {
+  content:'';
+  position:absolute; top:0; left:-100%; width:60%; height:100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.18), transparent);
+  transition: left .5s ease;
+  pointer-events:none;
+}
+.btn-masuk:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(14,50,103,0.38);
+}
+.btn-masuk:hover::before { left: 140%; }
+.btn-masuk:active { transform:translateY(0); }
+
+.ripple {
+  position:absolute; border-radius:50%;
+  background:rgba(255,255,255,0.25);
+  transform:scale(0); animation:rpl .55s linear; pointer-events:none;
+}
+@keyframes rpl { to { transform:scale(4); opacity:0; } }
+
+.card-footer {
+  border-top: 1px solid rgba(200,216,238,0.6);
+  padding: .9rem 2.2rem;
+  background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(219,234,254,0.3) 100%);
+  display: flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap;
+}
+.status-row { display:flex; align-items:center; gap:7px; font-size:.67rem; color:var(--teks-muted); }
+.status-dot {
+  width:7px; height:7px; border-radius:50%; background:#22c55e; flex-shrink:0;
+  animation: pg 2.5s ease infinite;
+}
+@keyframes pg {
+  0%,100% { box-shadow:0 0 0 0 rgba(34,197,94,.5); }
+  50%      { box-shadow:0 0 0 5px rgba(34,197,94,0); }
+}
+.cf-right { font-size:.62rem; color:#b5c4dc; }
+
+.site-footer {
+  position: relative; z-index: 5;
+  background: var(--biru-tua);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  min-height: 42px; display:flex; align-items:center; justify-content:center;
+  font-size:.62rem; color:rgba(255,255,255,.25); letter-spacing:.04em;
+  text-align:center; padding:0 1rem;
+}
+
+.popup-overlay {
+  position:fixed; inset:0; background:rgba(10,20,45,.4);
+  backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center;
+  z-index:999; animation:fadeO .2s ease;
+}
+@keyframes fadeO { from{opacity:0} to{opacity:1} }
+.popup-box {
+  background:rgba(255,255,255,.95);
+  backdrop-filter:blur(16px);
+  border:1px solid rgba(255,255,255,.9);
+  border-top:4px solid var(--biru);
+  border-radius:16px; padding:2.2rem 2rem;
+  text-align:center; width:320px; max-width:90vw;
+  box-shadow:0 24px 64px rgba(14,50,103,.2);
+  animation:popB .35s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popB { from{transform:scale(.8) translateY(16px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+.pop-icon {
+  width:54px; height:54px; border-radius:13px;
+  background:var(--biru-lite); border:2px solid rgba(37,99,176,.15);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.4rem; margin:0 auto 1rem;
+}
+.pop-title { font-family:'Lora',serif; font-size:1.05rem; font-weight:700; color:var(--teks); margin-bottom:5px; }
+.pop-msg   { font-size:.78rem; color:var(--teks-muted); margin-bottom:1.4rem; line-height:1.65; }
+.pop-btn   { padding:9px 26px; background:var(--biru); color:#fff; border:none; border-radius:8px; font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:.8rem; letter-spacing:.06em; text-transform:uppercase; cursor:pointer; transition:background .2s,transform .15s; }
+.pop-btn:hover { background:var(--biru-tua); transform:translateY(-1px); }
+
+@media (max-width:520px) {
+  .top-header { padding:0 1rem; }
+  .th-right { display:none; }
+  .page-body { padding:1.5rem .8rem 2rem; align-items:flex-start; }
+  .login-card { border-radius:14px; }
+  .card-header { padding:1.5rem 1.4rem 1.3rem; }
+  .header-logo-row { flex-direction:column; gap:10px; }
+  .logo-kop { text-align:center; }
+  .logo-circle { width:50px; height:50px; font-size:1.3rem; border-radius:12px; }
+  .card-body { padding:1.4rem 1.4rem 1.6rem; }
+  .card-footer { padding:.8rem 1.4rem; flex-direction:column; align-items:flex-start; gap:4px; }
+}
+
+@media (max-width:360px) {
+  .sys-title { font-size:1.4rem; }
+  .card-body { padding:1.2rem 1.1rem 1.4rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<header class="top-header">
+  <div class="th-left">
+    <div class="th-seal"><img src="/assets/logo-kominfo.png" style="width:28px;height:28px;object-fit:contain;"></div>
+    <div>
+      <div class="th-prov">Pemerintah Kabupaten Demak — Provinsi Jawa Tengah</div>
+      <div class="th-instansi">Dinas Komunikasi dan Informatika Kabupaten Demak</div>
+    </div>
+  </div>      
+</header>
+
+<main class="page-body">
+  <div class="login-card">
+
+    <div class="card-accent"></div>
+
+    <div class="card-header">
+      <div class="header-logo-row">
+        <div class="logo-circle"><img src="/assets/logo-kominfo-demak.jpeg" style="width:38px;height:38px;object-fit:contain;border-radius:6px;"></div>
+        <div class="logo-kop">
+          <div class="logo-kab">Pemerintah Kabupaten Demak</div>
+          <div class="logo-dinas">Dinas Komunikasi<br>dan Informatika</div>
+          <div class="logo-dinas-sub">Kabupaten Demak</div>
+        </div>
+      </div>
+
+      <div class="ornament-rule">
+        <div class="orn-l"></div>
+        <div class="orn-d"></div>
+        <div class="orn-l rev"></div>
+      </div>
+
+      <div class="sys-label">Sistem Presensi Digital</div>
+      <div class="sys-title">SIHADIR</div>
+      <div class="sys-desc">Sistem Informasi Kehadiran Pegawai &amp; Peserta Magang</div>
+    </div>
+
+    <div class="card-body">
+      <div class="form-section-label">
+        <div class="fsl-line"></div>
+        <div class="fsl-text">Autentikasi Pengguna</div>
+        <div class="fsl-line"></div>
+      </div>
+
+      <form action="/login" method="POST">
+        <div class="field">
+          <label class="field-lbl">Email</label>
+          <div class="input-wrap">
+            <input type="text" name="email" class="field-input"
+              placeholder="........@gmail.com" autocomplete="email">
+            <i class="fa fa-envelope fi-ic"></i>
+          </div>
+        </div>
+
+        <div class="field">
+          <label class="field-lbl">Kata Sandi</label>
+          <div class="input-wrap">
+            <input type="password" name="password" class="field-input"
+              id="pwInput" placeholder="••••••••" autocomplete="current-password">
+            <i class="fa fa-lock fi-ic"></i>
+            <button type="button" class="pw-btn" onclick="togglePw(this)">
+              <i class="fa fa-eye"></i>
+            </button>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-masuk" id="btnMasuk">
+          Masuk ke Sistem
+        </button>
+
+        <p style="margin-top:.65rem; text-align:center; font-size:.72rem; color:var(--teks-muted);">
+          Jika ada kendala, silahkan hubungi admin
+        </p>
+      </form>
+    </div>
+
+    <div class="card-footer">
+      <div class="status-row">
+        <span class="status-dot"></span>
+        Sistem aktif dan beroperasi
+      </div>
+      <div class="cf-right">Hanya pengguna terdaftar</div>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+SIHADIR - Dinas Komunikasi dan Informatika Kabupaten Demak
+</footer>
+
+{{ if .error }}
+<div class="popup-overlay" id="errPopup">
+  <div class="popup-box">
+    <div class="pop-icon">🔒</div>
+    <div class="pop-title">Login Gagal</div>
+    <div class="pop-msg">Email atau kata sandi yang Anda masukkan salah. Silakan periksa kembali.</div>
+    <button class="pop-btn" onclick="document.getElementById('errPopup').style.display='none'">Coba Lagi</button>
+  </div>
+</div>
+{{ end }}
+
+<script>
+function togglePw(btn) {
+  const inp = document.getElementById('pwInput');
+  const ico = btn.querySelector('i');
+  if (inp.type === 'password') {
+    inp.type = 'text'; ico.className = 'fa fa-eye-slash'; btn.style.color = '#2563b0';
+  } else {
+    inp.type = 'password'; ico.className = 'fa fa-eye'; btn.style.color = '';
+  }
+}
+
+document.getElementById('btnMasuk').addEventListener('click', function(e) {
+  const b = this, r = b.getBoundingClientRect(), s = Math.max(r.width, r.height);
+  const rp = document.createElement('span');
+  rp.className = 'ripple';
+  rp.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX-r.left-s/2}px;top:${e.clientY-r.top-s/2}px`;
+  b.appendChild(rp);
+  rp.addEventListener('animationend', () => rp.remove());
+});
+
+const card = document.querySelector('.login-card');
+document.addEventListener('mousemove', (e) => {
+  if (window.innerWidth < 600) return;
+  const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+  const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+  card.style.transform = `perspective(900px) rotateY(${dx * 2.5}deg) rotateX(${-dy * 1.8}deg)`;
+});
+document.addEventListener('mouseleave', () => {
+  card.style.transform = '';
+});
+</script>
+
+</body>
+</html>

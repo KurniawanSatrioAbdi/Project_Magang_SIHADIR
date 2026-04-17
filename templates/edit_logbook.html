@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edit Logbook — SIHADIR Dinkominfo Kab. Demak</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Lora:wght@600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --biru:       #1a4d8f;
+  --biru-tua:   #0e3267;
+  --biru-mid:   #2563b0;
+  --biru-lite:  #dbeafe;
+  --biru-pale:  #f0f5ff;
+  --hijau:      #15803d;
+  --hijau-lt:   #dcfce7;
+  --hijau-mid:  #16a34a;
+  --bg:         #f0f4f9;
+  --surface:    #ffffff;
+  --surface2:   #f5f8fc;
+  --border:     #d1ddf0;
+  --teks:       #172038;
+  --teks-mid:   #3d5280;
+  --teks-muted: #7a8fb0;
+  --mono:       'DM Mono', monospace;
+  --font:       'IBM Plex Sans', sans-serif;
+  --radius:     10px;
+  --shadow:     0 1px 4px rgba(14,50,103,.07), 0 4px 16px rgba(14,50,103,.08);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--teks); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: linear-gradient(135deg, var(--biru-tua) 0%, var(--biru) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 2px 16px rgba(14,50,103,0.28);
+  padding: 0 24px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  position: relative;
+}
+.topbar::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(147,197,253,0.7) 40%, rgba(96,165,250,1) 50%, rgba(147,197,253,0.7) 60%, transparent);
+  background-size: 200% 100%;
+  animation: shimmerLine 3.5s linear infinite;
+}
+@keyframes shimmerLine { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.topbar-brand { display: flex; align-items: center; gap: 11px; }
+.brand-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.brand-icon img { width: 26px; height: 26px; object-fit: contain; border-radius: 4px; }
+.brand-name { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: .01em; }
+.brand-sub  { font-size: 10px; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .08em; margin-top: 1px; }
+
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff; border-radius: 7px;
+  padding: 7px 13px; font-size: 12px; font-weight: 600;
+  text-decoration: none; font-family: var(--font);
+  letter-spacing: .03em; transition: background .2s, transform .15s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.18); transform: translateY(-1px); }
+
+/* ── PAGE ── */
+.page {
+  min-height: calc(100vh - 60px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.wrap { width: 100%; max-width: 520px; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 18px;
+  animation: fadeUp .4s ease both;
+}
+.page-title {
+  font-family: 'Lora', serif;
+  font-size: 20px; font-weight: 700; color: var(--teks); letter-spacing: -.01em;
+}
+.page-title-icon {
+  width: 38px; height: 38px; background: var(--biru);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: #fff; box-shadow: 0 4px 12px rgba(14,50,103,0.28);
+  flex-shrink: 0;
+}
+.page-sub { font-size: 12.5px; color: var(--teks-muted); margin-top: 3px; }
+
+/* ── FORM CARD ── */
+.form-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  animation: fadeUp .35s ease both;
+}
+
+.form-card-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 700; color: var(--teks-mid);
+  background: var(--biru-pale); letter-spacing: .02em;
+}
+.form-card-header i { color: var(--biru-mid); font-size: 12px; }
+.form-card-header .rule { flex: 1; height: 1px; background: var(--border); margin-left: 4px; }
+
+.form-body { padding: 18px; display: flex; flex-direction: column; gap: 16px; }
+
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-label {
+  font-size: 11px; font-weight: 700; color: var(--teks-muted);
+  text-transform: uppercase; letter-spacing: .07em;
+  display: flex; align-items: center; gap: 5px;
+}
+.form-label i { font-size: 10px; }
+.label-badge {
+  font-size: 9px; font-weight: 700;
+  padding: 2px 7px; border-radius: 3px;
+  background: var(--biru-lite); color: var(--biru);
+  margin-left: auto;
+}
+
+.input-wrap { position: relative; }
+.input-icon {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  color: #b5c4dc; font-size: 12px; pointer-events: none;
+}
+.textarea-wrap .input-icon { top: 12px; transform: none; }
+
+.form-input {
+  width: 100%; padding: 10px 13px 10px 36px;
+  border: 1.5px solid var(--border); border-radius: 7px;
+  font-family: var(--font); font-size: 13px; font-weight: 400;
+  color: var(--teks); background: var(--surface2);
+  transition: all .2s; outline: none;
+}
+.form-input:focus { border-color: var(--biru-mid); box-shadow: 0 0 0 3px rgba(37,99,176,.1); background: var(--surface); }
+.form-input::placeholder { color: #b5c4dc; }
+.form-input.date-input { font-family: var(--mono); }
+
+.form-textarea {
+  width: 100%; padding: 10px 13px 10px 36px;
+  border: 1.5px solid var(--border); border-radius: 7px;
+  font-family: var(--font); font-size: 13px; font-weight: 400;
+  color: var(--teks); background: var(--surface2);
+  transition: all .2s; outline: none;
+  resize: vertical; min-height: 120px; line-height: 1.6;
+}
+.form-textarea:focus { border-color: var(--biru-mid); box-shadow: 0 0 0 3px rgba(37,99,176,.1); background: var(--surface); }
+.form-textarea::placeholder { color: #b5c4dc; }
+
+.form-hint {
+  font-size: 10.5px; color: var(--teks-muted);
+  display: flex; align-items: center; gap: 5px;
+}
+.form-hint i { font-size: 10px; }
+
+/* ── CARD FOOTER ── */
+.form-card-footer {
+  padding: 14px 18px;
+  background: var(--surface2); border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+}
+
+.btn-save {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px;
+  background: var(--hijau-mid); color: #fff; border: none; border-radius: 7px;
+  font-family: var(--font); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s;
+  box-shadow: 0 3px 10px rgba(21,128,61,0.22); letter-spacing: .03em;
+}
+.btn-save:hover { background: var(--hijau); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(21,128,61,0.3); }
+.btn-save:active { transform: translateY(0); }
+
+.btn-cancel {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 16px;
+  background: var(--surface); color: var(--teks-muted);
+  border: 1.5px solid var(--border); border-radius: 7px;
+  font-family: var(--font); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .18s; text-decoration: none;
+}
+.btn-cancel:hover { border-color: var(--teks-muted); color: var(--teks); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(14px);} to{opacity:1;transform:translateY(0);} }
+
+@media (max-width: 520px) {
+  .topbar { padding: 0 14px; }
+  .brand-sub { display: none; }
+  .page { padding: 1.5rem .75rem; align-items: flex-start; }
+  .form-body { padding: 14px; }
+  .form-card-footer { flex-direction: column; }
+  .btn-save, .btn-cancel { width: 100%; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">
+      <img src="/assets/logo-kominfo-demak.jpeg" alt="Logo">
+    </div>
+    <div>
+      <div class="brand-name">SIHADIR</div>
+      <div class="brand-sub">Dashboard Magang</div>
+    </div>
+  </div>
+  <a href="/logbook" class="btn-back">
+    <i class="fa-solid fa-arrow-left"></i> Kembali
+  </a>
+</header>
+
+<div class="page">
+  <div class="wrap">
+
+    <div class="page-header">
+      <div class="page-title-icon"><i class="fa-solid fa-pen-to-square"></i></div>
+      <div>
+        <div class="page-title">Edit Logbook</div>
+        <div class="page-sub">Perbarui data entri logbook magang</div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="form-card-header">
+        <i class="fa-solid fa-pen-to-square"></i>
+        Formulir Edit Entri
+        <div class="rule"></div>
+      </div>
+
+      <form action="/update-logbook/{{ .logbook.ID }}" method="POST">
+        <div class="form-body">
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fa-regular fa-calendar"></i> Tanggal
+              <span class="label-badge">Wajib</span>
+            </label>
+            <div class="input-wrap">
+              <i class="fa-regular fa-calendar input-icon"></i>
+              <input type="date" name="tanggal" class="form-input date-input"
+                value="{{ .logbook.Tanggal }}" required>
+            </div>
+            <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Tanggal pelaksanaan kegiatan</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fa-solid fa-list-check"></i> Kegiatan
+              <span class="label-badge">Wajib</span>
+            </label>
+            <div class="input-wrap">
+              <i class="fa-solid fa-pen input-icon"></i>
+              <input type="text" name="kegiatan" class="form-input"
+                value="{{ .logbook.Kegiatan }}"
+                placeholder="Contoh: Membuat laporan mingguan..." required>
+            </div>
+            <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Ringkasan singkat kegiatan</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">
+              <i class="fa-solid fa-align-left"></i> Deskripsi
+            </label>
+            <div class="input-wrap textarea-wrap">
+              <i class="fa-solid fa-align-left input-icon"></i>
+              <textarea name="deskripsi" class="form-textarea"
+                placeholder="Tuliskan deskripsi detail kegiatan...">{{ .logbook.Deskripsi }}</textarea>
+            </div>
+            <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Penjelasan lengkap kegiatan</div>
+          </div>
+
+        </div>
+
+        <div class="form-card-footer">
+          <a href="/logbook" class="btn-cancel">
+            <i class="fa-solid fa-xmark"></i> Batal
+          </a>
+          <button type="submit" class="btn-save">
+            <i class="fa-solid fa-floppy-disk"></i> Simpan
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

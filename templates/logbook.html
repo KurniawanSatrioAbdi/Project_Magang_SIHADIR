@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logbook Magang — SIHADIR Dinkominfo Kab. Demak</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=Lora:wght@600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --biru:       #1a4d8f;
+  --biru-tua:   #0e3267;
+  --biru-mid:   #2563b0;
+  --biru-lite:  #dbeafe;
+  --biru-pale:  #f0f5ff;
+  --hijau:      #15803d;
+  --hijau-lt:   #dcfce7;
+  --hijau-mid:  #16a34a;
+  --merah:      #b91c1c;
+  --merah-lt:   #fee2e2;
+  --kuning:     #b45309;
+  --kuning-lt:  #fef9c3;
+  --ungu:       #5b21b6;
+  --ungu-lt:    #ede9fe;
+  --bg:         #f0f4f9;
+  --surface:    #ffffff;
+  --surface2:   #f5f8fc;
+  --border:     #d1ddf0;
+  --teks:       #172038;
+  --teks-mid:   #3d5280;
+  --teks-muted: #7a8fb0;
+  --mono:       'DM Mono', monospace;
+  --font:       'IBM Plex Sans', sans-serif;
+  --radius:     10px;
+  --shadow:     0 1px 4px rgba(14,50,103,.07), 0 4px 16px rgba(14,50,103,.08);
+  --shadow-lg:  0 8px 32px rgba(14,50,103,.15);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--teks); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+
+/* ── TOPBAR ── */
+.topbar {
+  background: linear-gradient(135deg, var(--biru-tua) 0%, var(--biru) 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  box-shadow: 0 2px 16px rgba(14,50,103,0.28);
+  padding: 0 24px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  position: relative;
+}
+.topbar::after {
+  content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(147,197,253,0.7) 40%, rgba(96,165,250,1) 50%, rgba(147,197,253,0.7) 60%, transparent);
+  background-size: 200% 100%;
+  animation: shimmerLine 3.5s linear infinite;
+}
+@keyframes shimmerLine { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+
+.topbar-brand { display: flex; align-items: center; gap: 11px; }
+.brand-icon {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.18);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+}
+.brand-icon img { width: 26px; height: 26px; object-fit: contain; border-radius: 4px; }
+.brand-name { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: .01em; }
+.brand-sub  { font-size: 10px; color: rgba(255,255,255,.45); text-transform: uppercase; letter-spacing: .08em; margin-top: 1px; }
+
+.topbar-clock {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  text-align: center; pointer-events: none;
+}
+.clock-time { font-family: var(--mono); font-size: 18px; font-weight: 500; color: #fff; letter-spacing: 2px; line-height: 1; }
+.clock-date { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 2px; }
+
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.18);
+  color: #fff; border-radius: 7px;
+  padding: 7px 13px; font-size: 12px; font-weight: 600;
+  text-decoration: none; font-family: var(--font);
+  letter-spacing: .03em; transition: background .2s, transform .15s;
+}
+.btn-back:hover { background: rgba(255,255,255,0.18); transform: translateY(-1px); }
+
+/* ── PAGE ── */
+.page { padding: 24px 18px; max-width: 680px; margin: 0 auto; }
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 18px; animation: fadeUp .4s ease both; }
+.page-title {
+  font-family: 'Lora', serif;
+  font-size: 20px; font-weight: 700; color: var(--teks);
+  display: flex; align-items: center; gap: 10px; letter-spacing: -.01em;
+}
+.page-title-icon {
+  width: 38px; height: 38px; background: var(--biru);
+  border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-size: 15px; color: #fff; box-shadow: 0 4px 12px rgba(14,50,103,0.28);
+}
+.page-subtitle { font-size: 12.5px; color: var(--teks-muted); margin-top: 4px; margin-left: 48px; }
+
+/* ── MAGANG BADGE ── */
+.magang-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--ungu-lt); color: var(--ungu);
+  border: 1px solid #c4b5fd; border-radius: 4px;
+  padding: 4px 12px; font-size: 11.5px; font-weight: 700;
+  margin-bottom: 16px; letter-spacing: .03em;
+  animation: fadeUp .4s ease .05s both;
+}
+
+/* ── STATS ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(2,1fr); gap: 12px;
+  margin-bottom: 16px; animation: fadeUp .4s ease .1s both;
+}
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px;
+  box-shadow: var(--shadow); text-align: center; position: relative; overflow: hidden;
+}
+.stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+.stat-card.blue::before  { background: var(--biru); }
+.stat-card.green::before { background: var(--hijau-mid); }
+.stat-icon {
+  width: 32px; height: 32px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; margin: 0 auto 8px;
+}
+.stat-icon.blue  { background: var(--biru-lite); color: var(--biru); }
+.stat-icon.green { background: var(--hijau-lt);  color: var(--hijau-mid); }
+.stat-val { font-size: 22px; font-weight: 700; color: var(--teks); font-family: var(--mono); line-height: 1; }
+.stat-lbl { font-size: 11px; color: var(--teks-muted); margin-top: 3px; font-weight: 600; }
+
+/* ── FORM CARD ── */
+.form-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  margin-bottom: 16px; box-shadow: var(--shadow);
+  animation: fadeUp .4s ease .15s both;
+}
+.form-card-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 700; color: var(--teks-mid);
+  background: var(--biru-pale); letter-spacing: .02em;
+}
+.form-card-header i { color: var(--biru-mid); font-size: 12px; }
+.form-card-header .rule { flex: 1; height: 1px; background: var(--border); margin-left: 4px; }
+.form-body { padding: 16px; }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 11px; font-weight: 700; color: var(--teks-muted); text-transform: uppercase; letter-spacing: .07em; }
+.form-control {
+  font-family: var(--font); font-size: 13px;
+  border: 1.5px solid var(--border); border-radius: 7px;
+  padding: 10px 13px; background: var(--surface2); color: var(--teks);
+  transition: all .2s; outline: none; width: 100%;
+}
+.form-control:focus { border-color: var(--biru-mid); background: var(--surface); box-shadow: 0 0 0 3px rgba(37,99,176,.1); }
+.form-control::placeholder { color: #b5c4dc; }
+textarea.form-control { resize: vertical; min-height: 88px; line-height: 1.5; }
+
+.btn-tambah {
+  width: 100%; margin-top: 4px;
+  background: var(--hijau-mid); color: #fff; border: none; border-radius: 7px;
+  padding: 11px; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; font-family: var(--font);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  letter-spacing: .03em;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  box-shadow: 0 3px 10px rgba(21,128,61,0.22);
+}
+.btn-tambah:hover { background: var(--hijau); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(21,128,61,0.3); }
+
+/* ── TABLE CARD ── */
+.table-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow); margin-bottom: 18px;
+  animation: fadeUp .4s ease .25s both;
+}
+.table-card-header {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--biru-pale);
+}
+.table-card-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 700; color: var(--teks-mid);
+}
+.table-card-title i { color: var(--biru-mid); font-size: 12px; }
+.entry-count {
+  font-size: 11px; font-weight: 700;
+  background: var(--biru-lite); color: var(--biru);
+  border: 1px solid #bfdbfe; border-radius: 4px; padding: 2px 9px;
+}
+
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+thead tr { background: var(--surface2); }
+thead th {
+  padding: 10px 14px; text-align: left;
+  font-size: 10.5px; font-weight: 700; color: var(--teks-muted);
+  text-transform: uppercase; letter-spacing: .06em;
+  white-space: nowrap; border-bottom: 1px solid var(--border);
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+tbody td { padding: 11px 14px; font-size: 13px; vertical-align: middle; }
+
+.td-no { font-family: var(--mono); font-size: 12px; color: var(--teks-muted); width: 36px; }
+.date-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--biru-pale); color: var(--biru-mid);
+  border: 1px solid #bfdbfe; border-radius: 5px;
+  padding: 3px 8px; font-size: 11.5px; font-weight: 700; white-space: nowrap;
+}
+.td-kegiatan { font-weight: 600; color: var(--teks); }
+.td-desc { color: var(--teks-muted); font-size: 12.5px; line-height: 1.4; max-width: 180px; }
+
+.aksi-wrap { display: flex; gap: 6px; }
+.btn-edit {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--kuning-lt); color: var(--kuning);
+  border: 1px solid #fde68a; border-radius: 6px;
+  padding: 4px 10px; font-size: 11.5px; font-weight: 700;
+  text-decoration: none; transition: all .15s; font-family: var(--font); white-space: nowrap;
+}
+.btn-edit:hover { background: var(--kuning); color: #fff; transform: translateY(-1px); }
+.btn-hapus {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--merah-lt); color: var(--merah);
+  border: 1px solid #fecaca; border-radius: 6px;
+  padding: 4px 10px; font-size: 11.5px; font-weight: 700;
+  text-decoration: none; transition: all .15s; font-family: var(--font); white-space: nowrap;
+}
+.btn-hapus:hover { background: var(--merah); color: #fff; transform: translateY(-1px); }
+
+/* ── EMPTY STATE ── */
+.empty-state { padding: 44px 20px; text-align: center; }
+.empty-icon {
+  width: 64px; height: 64px; border-radius: 12px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin: 0 auto 14px; color: var(--teks-muted);
+}
+.empty-title { font-size: 14px; font-weight: 700; color: var(--teks); margin-bottom: 5px; }
+.empty-desc  { font-size: 12.5px; color: var(--teks-muted); line-height: 1.5; }
+
+/* ── PAGE FOOTER ── */
+.page-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  animation: fadeUp .4s ease .35s both;
+}
+.footer-note { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--teks-muted); }
+.btn-download {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--biru); color: #fff; border: none; border-radius: 7px;
+  padding: 10px 18px; font-size: 13px; font-weight: 700;
+  text-decoration: none; transition: all .2s;
+  box-shadow: 0 3px 10px rgba(14,50,103,0.25); font-family: var(--font);
+  letter-spacing: .03em;
+}
+.btn-download:hover { background: var(--biru-tua); transform: translateY(-1px); box-shadow: 0 5px 16px rgba(14,50,103,0.32); }
+
+/* ── POPUP HAPUS ── */
+.popup-hapus-overlay {
+  position: fixed; inset: 0; background: rgba(8,18,40,0.55);
+  backdrop-filter: blur(8px); z-index: 9999;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity .3s ease;
+}
+.popup-hapus-overlay.show { opacity: 1; pointer-events: all; }
+.popup-hapus-card {
+  background: var(--surface); border-radius: 14px;
+  border-top: 4px solid var(--merah);
+  width: 100%; max-width: 340px; padding: 28px 24px 22px;
+  text-align: center; box-shadow: 0 24px 64px rgba(8,18,40,0.25);
+  transform: scale(.82) translateY(24px);
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+.popup-hapus-overlay.show .popup-hapus-card { transform: scale(1) translateY(0); }
+.hapus-icon-wrap {
+  width: 60px; height: 60px; border-radius: 12px;
+  background: var(--merah-lt); border: 1.5px solid #fecaca;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; color: var(--merah); margin: 0 auto 14px;
+  animation: iconPop .4s cubic-bezier(.34,1.56,.64,1) .1s both;
+}
+@keyframes iconPop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.hapus-title { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; color: var(--teks); margin-bottom: 7px; }
+.hapus-desc  { font-size: 12.5px; color: var(--teks-muted); line-height: 1.6; margin-bottom: 18px; }
+.hapus-btns  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.btn-batal {
+  background: var(--surface2); color: var(--teks);
+  border: 1.5px solid var(--border); border-radius: 7px;
+  padding: 11px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: var(--font); transition: all .15s;
+}
+.btn-batal:hover { background: var(--border); }
+.btn-konfirm-hapus {
+  background: var(--merah); color: #fff; border: none; border-radius: 7px;
+  padding: 11px; font-size: 13px; font-weight: 700;
+  cursor: pointer; font-family: var(--font); transition: all .15s;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  text-decoration: none;
+}
+.btn-konfirm-hapus:hover { background: #991b1b; transform: translateY(-1px); }
+
+/* ── POPUP SUKSES ── */
+.popup-success-overlay {
+  position: fixed; inset: 0; background: rgba(8,18,40,0.55);
+  backdrop-filter: blur(8px); z-index: 9999;
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+  opacity: 0; pointer-events: none; transition: opacity .3s ease;
+}
+.popup-success-overlay.show { opacity: 1; pointer-events: all; }
+.popup-success-card {
+  background: var(--surface); border-radius: 14px;
+  border-top: 4px solid var(--hijau-mid);
+  width: 100%; max-width: 320px; padding: 32px 26px 26px;
+  text-align: center; box-shadow: 0 24px 64px rgba(8,18,40,0.25);
+  transform: scale(.82) translateY(24px);
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+}
+.popup-success-overlay.show .popup-success-card { transform: scale(1) translateY(0); }
+.check-wrap { width: 80px; height: 80px; margin: 0 auto 18px; position: relative; }
+.check-circle-bg { width: 80px; height: 80px; border-radius: 50%; background: var(--hijau-lt); position: absolute; inset: 0; animation: circlePop .4s cubic-bezier(.34,1.56,.64,1) .1s both; }
+@keyframes circlePop { from{transform:scale(0);opacity:0;} to{transform:scale(1);opacity:1;} }
+.check-svg { position: absolute; inset: 0; width: 80px; height: 80px; }
+.check-circle-stroke { fill: none; stroke: var(--hijau-mid); stroke-width: 3; stroke-dasharray: 220; stroke-dashoffset: 220; animation: drawCircle .5s ease .2s forwards; }
+@keyframes drawCircle { to{stroke-dashoffset:0;} }
+.check-tick { fill: none; stroke: var(--hijau-mid); stroke-width: 4.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 55; stroke-dashoffset: 55; animation: drawTick .35s ease .65s forwards; }
+@keyframes drawTick { to{stroke-dashoffset:0;} }
+.success-title    { font-family: 'Lora', serif; font-size: 17px; font-weight: 700; color: var(--teks); margin-bottom: 5px; }
+.success-subtitle { font-size: 12.5px; color: var(--teks-muted); margin-bottom: 18px; line-height: 1.55; }
+.btn-popup-ok {
+  width: 100%; background: var(--hijau-mid); color: #fff; border: none;
+  border-radius: 7px; padding: 12px; font-size: 13.5px; font-weight: 700;
+  cursor: pointer; font-family: var(--font);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  letter-spacing: .04em; transition: all .18s;
+  box-shadow: 0 4px 12px rgba(21,128,61,0.28);
+}
+.btn-popup-ok:hover { background: var(--hijau); transform: translateY(-1px); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+
+@media (max-width: 520px) {
+  .topbar { padding: 0 14px; }
+  .clock-time { font-size: 15px; }
+  .clock-date { display: none; }
+  .form-row { grid-template-columns: 1fr; }
+  .page { padding: 14px 12px; }
+  .td-desc { display: none; }
+  .brand-sub { display: none; }
+  .page-subtitle { margin-left: 0; margin-top: 5px; }
+}
+</style>
+</head>
+<body>
+
+<!-- POPUP SUKSES -->
+<div class="popup-success-overlay" id="popup-sukses">
+  <div class="popup-success-card">
+    <div class="check-wrap">
+      <div class="check-circle-bg"></div>
+      <svg class="check-svg" viewBox="0 0 80 80">
+        <circle class="check-circle-stroke" cx="40" cy="40" r="34"/>
+        <polyline class="check-tick" points="24,40 35,51 56,29"/>
+      </svg>
+    </div>
+    <div class="success-title">Entri Ditambahkan!</div>
+    <div class="success-subtitle">Kegiatan harian kamu berhasil dicatat ke dalam logbook.</div>
+    <button class="btn-popup-ok" onclick="tutupSukses()">
+      <i class="fa-solid fa-check"></i> Oke, Lanjutkan!
+    </button>
+  </div>
+</div>
+
+<!-- POPUP KONFIRMASI HAPUS -->
+<div class="popup-hapus-overlay" id="popup-hapus">
+  <div class="popup-hapus-card">
+    <div class="hapus-icon-wrap"><i class="fa-solid fa-trash"></i></div>
+    <div class="hapus-title">Hapus Entri?</div>
+    <div class="hapus-desc">Entri logbook ini akan dihapus permanen dan tidak bisa dikembalikan.</div>
+    <div class="hapus-btns">
+      <button class="btn-batal" onclick="tutupHapus()">Batal</button>
+      <a class="btn-konfirm-hapus" id="link-hapus" href="#">
+        <i class="fa-solid fa-trash"></i> Hapus
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-icon">
+      <img src="/assets/logo-kominfo-demak.jpeg" alt="Logo">
+    </div>
+    <div>
+      <div class="brand-name">SIHADIR</div>
+      <div class="brand-sub">Dashboard Magang</div>
+    </div>
+  </div>
+  <div class="topbar-clock">
+    <div class="clock-time" id="clock-time">00:00:00</div>
+    <div class="clock-date" id="clock-date">—</div>
+  </div>
+  <a href="/magang" class="btn-back">
+    <i class="fa-solid fa-arrow-left"></i> Kembali
+  </a>
+</header>
+
+<div class="page">
+
+  <div class="page-header">
+    <div class="page-title">
+      <div class="page-title-icon"><i class="fa-solid fa-book-open"></i></div>
+      Logbook Magang
+    </div>
+    <div class="page-subtitle">Catatan kegiatan harian selama magang</div>
+  </div>
+
+  <div class="magang-badge"><i class="fa-solid fa-user-graduate"></i> {{ .user.Nama }}</div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card blue">
+      <div class="stat-icon blue"><i class="fa-solid fa-list-check"></i></div>
+      <div class="stat-val">{{ len .data }}</div>
+      <div class="stat-lbl">Total Entri Logbook</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-icon green"><i class="fa-solid fa-calendar-week"></i></div>
+      <div class="stat-val" id="stat-minggu">—</div>
+      <div class="stat-lbl">Minggu Magang</div>
+    </div>
+  </div>
+
+  <!-- FORM -->
+  <div class="form-card">
+    <div class="form-card-header">
+      <i class="fa-solid fa-plus"></i>
+      Tambah Entri Baru
+      <div class="rule"></div>
+    </div>
+    <div class="form-body">
+      <form action="/tambah-logbook" method="POST">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tanggal</label>
+            <input type="date" name="tanggal" class="form-control" required id="tanggal-logbook">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kegiatan</label>
+            <input type="text" name="kegiatan" placeholder="Nama kegiatan…" class="form-control" required>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Deskripsi</label>
+            <textarea name="deskripsi" placeholder="Jelaskan kegiatan yang dilakukan hari ini…" class="form-control"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn-tambah">
+          <i class="fa-solid fa-plus"></i> Tambah
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <div class="table-card-title">
+        <i class="fa-solid fa-table-list"></i> Riwayat Logbook
+      </div>
+      <div class="entry-count">{{ len .data }} entri</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tanggal</th>
+            <th>Kegiatan</th>
+            <th>Deskripsi</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{ range $i, $v := .data }}
+          <tr>
+            <td class="td-no">{{ $i | addOne }}</td>
+            <td>
+              <span class="date-badge" data-tanggal="{{ .Tanggal }}">
+                <i class="fa-regular fa-calendar"></i>
+                {{ .Tanggal }}
+              </span>
+            </td>
+            <td class="td-kegiatan">{{ .Kegiatan }}</td>
+            <td class="td-desc">{{ .Deskripsi }}</td>
+            <td>
+              <div class="aksi-wrap">
+                <a href="/edit-logbook/{{ .ID }}" class="btn-edit">
+                  <i class="fa-solid fa-pen"></i> Edit
+                </a>
+                <a href="#" class="btn-hapus" onclick="konfirmHapus(event, '/hapus-logbook/{{ .ID }}')">
+                  <i class="fa-solid fa-trash"></i> Hapus
+                </a>
+              </div>
+            </td>
+          </tr>
+          {{ else }}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <div class="empty-icon"><i class="fa-regular fa-folder-open"></i></div>
+                <div class="empty-title">Belum Ada Entri</div>
+                <div class="empty-desc">Tambahkan kegiatan pertama kamu menggunakan form di atas.</div>
+              </div>
+            </td>
+          </tr>
+          {{ end }}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="page-footer">
+    <div class="footer-note">
+      <i class="fa-solid fa-circle-info" style="color:var(--teks-muted)"></i>
+      Data tersimpan otomatis
+    </div>
+    <a href="/download-logbook" class="btn-download">
+      <i class="fa-solid fa-file-pdf"></i> Download PDF
+    </a>
+  </div>
+
+</div>
+
+<script>
+function updateClock(){
+  const now=new Date(),days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
+  document.getElementById('clock-time').textContent=now.toLocaleTimeString('id-ID',{hour12:false})
+  document.getElementById('clock-date').textContent=days[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear()
+}
+setInterval(updateClock,1000);updateClock()
+
+document.getElementById('tanggal-logbook').value = new Date().toISOString().split('T')[0]
+
+function hitungMingguMagang(){
+  const badges=document.querySelectorAll('[data-tanggal]')
+  if(badges.length===0){document.getElementById('stat-minggu').textContent='—';return}
+  const tanggals=Array.from(badges).map(el=>new Date(el.dataset.tanggal))
+  const pertama=new Date(Math.min(...tanggals))
+  const mingguKe=Math.floor((new Date()-pertama)/(7*24*60*60*1000))+1
+  document.getElementById('stat-minggu').textContent=mingguKe
+}
+hitungMingguMagang()
+
+const params=new URLSearchParams(window.location.search)
+if(params.get('success')==='1'){document.getElementById('popup-sukses').classList.add('show')}
+function tutupSukses(){document.getElementById('popup-sukses').classList.remove('show')}
+
+function konfirmHapus(e,url){
+  e.preventDefault()
+  document.getElementById('link-hapus').href=url
+  document.getElementById('popup-hapus').classList.add('show')
+}
+function tutupHapus(){document.getElementById('popup-hapus').classList.remove('show')}
+</script>
+</body>
+</html>

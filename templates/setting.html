@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waktu & Lokasi — Sistem Presensi</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<style>
+:root {
+  --sidebar-w: 248px;
+  --navy:      #1a3d6e;
+  --navy-dk:   #122b50;
+  --navy-md:   #2155a0;
+  --navy-lt:   #e8f0fb;
+  --gov-accent:#2e7dcc;
+  --bg:        #f0f2f5;
+  --surface:   #ffffff;
+  --surface2:  #f7f9fc;
+  --border:    #d9e0ea;
+  --green:     #1b6b35;
+  --green-lt:  #e2f4e9;
+  --red:       #b52020;
+  --red-lt:    #fce8e8;
+  --yellow:    #8a5c00;
+  --yellow-lt: #fef8e6;
+  --text:      #1c2b3a;
+  --muted:     #718096;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+  --shadow:    0 1px 4px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.05);
+  --font:   'Noto Sans', sans-serif;
+  --mono:   'DM Mono', monospace;
+  --radius: 6px;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:var(--font); background:var(--bg); color:var(--text); display:flex; min-height:100vh; font-size:13px; }
+
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:200; }
+.overlay.show { display:block; }
+
+/* ════ SIDEBAR ════ */
+.sidebar { width:var(--sidebar-w); background:var(--navy-dk); display:flex; flex-direction:column; position:fixed; top:0; left:0; height:100vh; z-index:300; transition:transform 0.25s ease; }
+.sidebar-brand { background:var(--navy); padding:12px 14px; border-bottom:1px solid rgba(255,255,255,0.1); display:flex; align-items:center; gap:10px; min-height:66px; }
+.brand-logo { width:42px; height:42px; background:#fff; border-radius:4px; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; }
+.brand-logo img { width:100%; height:100%; object-fit:contain; padding:3px; }
+.brand-name { font-size:12px; font-weight:700; color:#fff; line-height:1.3; }
+.brand-sub  { font-size:9.5px; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
+.sidebar-nav { padding:8px; flex:1; overflow-y:auto; }
+.nav-group-label { font-size:9px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:rgba(255,255,255,0.3); padding:10px 10px 4px; }
+.nav-item { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:4px; color:rgba(255,255,255,0.65); text-decoration:none; font-size:12.5px; font-weight:500; transition:all 0.12s; margin-bottom:1px; }
+.nav-item i { width:15px; text-align:center; font-size:12px; flex-shrink:0; }
+.nav-item:hover { background:rgba(255,255,255,0.08); color:#fff; }
+.nav-item.active { background:var(--gov-accent); color:#fff; font-weight:600; }
+.nav-item.logout { color:rgba(255,150,150,0.8); margin-top:2px; }
+.nav-item.logout:hover { background:rgba(220,50,50,0.15); color:#ff9999; }
+.nav-sep { height:1px; background:rgba(255,255,255,0.07); margin:6px 8px; }
+.sidebar-footer { padding:10px 8px; border-top:1px solid rgba(255,255,255,0.08); background:rgba(0,0,0,0.15); }
+.user-card { display:flex; align-items:center; gap:9px; padding:8px 10px; border-radius:4px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); margin-bottom:6px; }
+.user-avatar { width:28px; height:28px; border-radius:4px; background:var(--gov-accent); display:flex; align-items:center; justify-content:center; font-size:11px; color:#fff; flex-shrink:0; }
+.user-name { font-size:11.5px; font-weight:600; color:#fff; }
+.user-role { font-size:9.5px; color:rgba(255,255,255,0.4); }
+
+/* ════ MAIN ════ */
+.main { margin-left:var(--sidebar-w); flex:1; display:flex; flex-direction:column; min-height:100vh; }
+.topbar { background:var(--surface); border-bottom:1px solid var(--border); padding:0 24px; height:54px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; box-shadow:var(--shadow-sm); }
+.topbar-left { display:flex; align-items:center; gap:10px; }
+.hamburger { display:none; width:32px; height:32px; border:1px solid var(--border); border-radius:4px; background:var(--surface2); color:var(--muted); align-items:center; justify-content:center; cursor:pointer; font-size:13px; transition:0.12s; flex-shrink:0; }
+.hamburger:hover { color:var(--navy); border-color:var(--navy); }
+.page-title { font-size:14px; font-weight:700; color:var(--navy); }
+.breadcrumb-text { font-size:10.5px; color:var(--muted); margin-top:1px; }
+.topbar-center { position:absolute; left:50%; transform:translateX(-50%); text-align:center; pointer-events:none; }
+.clock-time { font-family:var(--mono); font-size:17px; font-weight:500; color:var(--navy); letter-spacing:2px; line-height:1; }
+.clock-date { font-size:10px; color:var(--muted); margin-top:2px; }
+.topbar-right { display:flex; align-items:center; gap:6px; }
+.icon-btn { width:32px; height:32px; border-radius:4px; background:var(--surface2); border:1px solid var(--border); color:var(--muted); display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:12px; transition:0.12s; text-decoration:none; }
+.icon-btn.danger:hover { color:var(--red); border-color:#e8a0a0; background:var(--red-lt); }
+
+/* ════ CONTENT ════ */
+.content { padding:20px 24px; flex:1; }
+.section-title { font-size:11px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--navy); margin-bottom:12px; padding-bottom:8px; border-bottom:2px solid var(--navy-lt); display:flex; align-items:center; gap:8px; }
+.section-title i { font-size:12px; color:var(--gov-accent); }
+
+/* LAYOUT */
+.setting-layout { display:grid; grid-template-columns:1fr 270px; gap:16px; align-items:start; }
+.setting-col { display:flex; flex-direction:column; }
+.preview-sticky { position:sticky; top:64px; }
+
+/* SETTING CARD */
+.setting-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden; margin-bottom:14px; }
+.card-header { padding:14px 18px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; background:var(--surface2); }
+.card-header-icon { width:36px; height:36px; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:15px; flex-shrink:0; }
+.card-header-icon.blue   { background:var(--navy-lt);   color:var(--navy-md); }
+.card-header-icon.yellow { background:var(--yellow-lt); color:var(--yellow); }
+.card-header-icon.green  { background:var(--green-lt);  color:var(--green); }
+.card-header-title { font-size:13px; font-weight:700; color:var(--navy); }
+.card-header-sub   { font-size:10.5px; color:var(--muted); margin-top:1px; }
+.card-body { padding:18px 18px; }
+
+/* FIELDS */
+.fields-grid   { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.fields-grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-group { display:flex; flex-direction:column; gap:5px; }
+.form-label { font-size:10.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center; gap:5px; }
+.badge-wajib    { font-size:9px; font-weight:700; padding:1px 6px; border-radius:3px; background:var(--navy-lt); color:var(--navy-md); border:1px solid #b8cee8; margin-left:auto; }
+.badge-opsional { font-size:9px; font-weight:700; padding:1px 6px; border-radius:3px; background:var(--surface2); color:var(--muted); border:1px solid var(--border); margin-left:auto; }
+.input-wrap { position:relative; }
+.input-wrap .ico { position:absolute; left:11px; top:50%; transform:translateY(-50%); font-size:11px; pointer-events:none; }
+.ico.green  { color:var(--green); }
+.ico.blue   { color:var(--navy-md); }
+.ico.yellow { color:var(--yellow); }
+.ico.red    { color:var(--red); }
+.time-input, .text-input, .number-input {
+  width:100%; border:1px solid var(--border); border-radius:4px;
+  font-family:var(--font); color:var(--text); background:var(--surface2);
+  outline:none; transition:0.15s;
+}
+.time-input   { padding:9px 12px 9px 32px; font-family:var(--mono); font-size:14px; font-weight:500; }
+.text-input   { padding:9px 12px 9px 32px; font-size:12.5px; }
+.number-input { padding:9px 12px 9px 32px; font-size:12.5px; }
+.time-input:focus, .text-input:focus, .number-input:focus { background:var(--surface); }
+.focus-green:focus  { border-color:var(--green);   box-shadow:0 0 0 2px rgba(27,107,53,0.1); }
+.focus-blue:focus   { border-color:var(--navy);    box-shadow:0 0 0 2px rgba(26,61,110,0.1); }
+.focus-yellow:focus { border-color:#c47a00;         box-shadow:0 0 0 2px rgba(138,92,0,0.1); }
+.focus-red:focus    { border-color:var(--red);      box-shadow:0 0 0 2px rgba(181,32,32,0.1); }
+.form-hint { font-size:10.5px; color:var(--muted); display:flex; align-items:center; gap:4px; }
+
+/* MAP */
+.map-container { border-radius:4px; overflow:hidden; border:1px solid var(--border); margin-top:12px; }
+#setting-map { height:270px; }
+.map-info { background:var(--navy-lt); border:1px solid #b8cee8; border-radius:4px; padding:9px 13px; margin-top:10px; font-size:11.5px; color:var(--navy); display:flex; align-items:center; gap:8px; }
+.map-info i { font-size:12px; flex-shrink:0; }
+.btn-lokasi-saya { display:inline-flex; align-items:center; gap:6px; background:var(--green-lt); color:var(--green); border:1px solid #a8d8b8; border-radius:4px; padding:7px 14px; font-size:12px; font-weight:600; cursor:pointer; font-family:var(--font); transition:all 0.15s; margin-top:10px; }
+.btn-lokasi-saya:hover { background:#a8d8b8; }
+
+/* PREVIEW */
+.preview-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); margin-bottom:14px; }
+.preview-card-header { padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; background:var(--surface2); }
+.preview-card-header i { color:var(--gov-accent); font-size:12px; }
+.preview-card-title { font-size:12.5px; font-weight:700; color:var(--navy); }
+.preview-section-label { margin:10px 14px 4px; font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.preview-section-label span { flex:1; height:1px; background:var(--border); }
+.preview-items { padding:6px 12px 12px; display:flex; flex-direction:column; gap:7px; }
+.preview-item { border-radius:4px; padding:10px 12px; display:flex; align-items:center; gap:10px; border:1px solid; }
+.preview-item.p-masuk  { background:var(--green-lt); border-color:#a8d8b8; }
+.preview-item.p-pulang { background:var(--navy-lt);  border-color:#b8cee8; }
+.preview-item-icon { width:30px; height:30px; border-radius:4px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:12px; }
+.preview-item.p-masuk  .preview-item-icon { background:rgba(27,107,53,0.12); color:var(--green); }
+.preview-item.p-pulang .preview-item-icon { background:rgba(26,61,110,0.12); color:var(--navy); }
+.preview-item-label { font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; color:var(--muted); margin-bottom:2px; }
+.preview-item-value { font-family:var(--mono); font-size:17px; font-weight:600; color:var(--text); line-height:1; }
+.preview-radius-box { margin:0 12px 12px; background:var(--red-lt); border:1px solid #e8b0b0; border-radius:4px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
+.preview-radius-box i { color:var(--red); font-size:14px; flex-shrink:0; }
+.preview-radius-label { font-size:9.5px; font-weight:700; color:var(--red); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:2px; }
+.preview-radius-value { font-family:var(--mono); font-size:17px; font-weight:600; color:var(--red); line-height:1; }
+.preview-info { margin:0 12px 12px; background:var(--yellow-lt); border:1px solid #e8d080; border-radius:4px; padding:9px 12px; font-size:11px; color:#7a4f00; display:flex; gap:8px; align-items:flex-start; line-height:1.5; }
+.preview-info i { font-size:11px; margin-top:1px; flex-shrink:0; }
+
+/* FOOTER */
+.card-footer-fixed { padding:14px 20px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow-sm); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:24px; }
+.footer-note { font-size:11px; color:var(--muted); display:flex; align-items:center; gap:6px; }
+.footer-note i { color:var(--yellow); }
+.btn-save { display:inline-flex; align-items:center; gap:7px; padding:9px 20px; background:var(--navy); color:#fff; border:none; border-radius:4px; font-family:var(--font); font-size:12.5px; font-weight:600; cursor:pointer; transition:0.15s; }
+.btn-save:hover { background:var(--navy-md); }
+.btn-cancel { display:inline-flex; align-items:center; gap:6px; padding:9px 14px; background:var(--surface); color:var(--muted); border:1px solid var(--border); border-radius:4px; font-family:var(--font); font-size:12.5px; font-weight:600; cursor:pointer; transition:0.15s; text-decoration:none; }
+.btn-cancel:hover { border-color:var(--muted); color:var(--text); }
+
+/* ANIMATIONS */
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+.setting-card { animation:fadeIn 0.3s ease both; }
+.setting-card:nth-child(2) { animation-delay:0.06s; }
+.setting-card:nth-child(3) { animation-delay:0.12s; }
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);box-shadow:2px 0 20px rgba(0,0,0,0.2);}
+  .main{margin-left:0;}.hamburger{display:flex;}
+  .setting-layout{grid-template-columns:1fr;}
+  .preview-sticky{position:static;}
+  .fields-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){
+  .content{padding:14px 12px;}.topbar{padding:0 12px;}
+  .page-title{font-size:13px;}.breadcrumb-text{display:none;}
+  .topbar-center{display:none;}
+  .fields-grid{grid-template-columns:1fr;}
+  .fields-grid-2{grid-template-columns:1fr;}
+  .card-body{padding:14px;}
+  .card-footer-fixed{flex-direction:column;align-items:stretch;}
+  .card-footer-fixed > div{width:100%;}
+  .btn-save,.btn-cancel{justify-content:center;width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo"><img src="/assets/logo-kominfo-demak.jpeg" alt="Logo"></div>
+    <div><div class="brand-name">Dinkominfo Demak</div><div class="brand-sub">Admin Panel</div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-group-label">Menu Utama</div>
+    <a href="/admin" class="nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+    <div class="nav-sep"></div>
+    <div class="nav-group-label">Manajemen</div>
+    <a href="/admin/presensi" class="nav-item"><i class="fa-solid fa-list-check"></i> Monitoring Presensi</a>
+    <a href="/admin/logbook" class="nav-item"><i class="fa-solid fa-book-open"></i> Logbook Magang</a>
+    <a href="/admin/izin" class="nav-item"><i class="fa-solid fa-file-circle-check"></i> Pengajuan Izin</a>
+    <a href="/admin/users" class="nav-item"><i class="fa-solid fa-users-gear"></i> Manajemen User</a>
+    <div class="nav-sep"></div>
+    <div class="nav-group-label">Konfigurasi</div>
+    <a href="/admin/setting" class="nav-item active"><i class="fa-solid fa-clock-rotate-left"></i> Waktu &amp; Lokasi</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar"><i class="fa-solid fa-user-shield"></i></div>
+      <div><div class="user-name">Administrator</div><div class="user-role">Admin Sistem</div></div>
+    </div>
+    <a href="/logout" class="nav-item logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" id="hamburger" onclick="openSidebar()"><i class="fa-solid fa-bars"></i></div>
+      <div><div class="page-title">Waktu &amp; Lokasi</div><div class="breadcrumb-text">Konfigurasi &rarr; Jam Kerja &amp; Lokasi</div></div>
+    </div>
+    <div class="topbar-center">
+      <div class="clock-time" id="clock-time">00:00:00</div>
+      <div class="clock-date" id="clock-date">—</div>
+    </div>
+    <div class="topbar-right">
+      <a href="/logout" class="icon-btn danger" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+    </div>
+  </header>
+
+  <div class="content">
+    <form method="POST" action="/admin/setting">
+    <div class="setting-layout">
+
+      <!-- KOLOM KIRI -->
+      <div class="setting-col">
+
+        <div class="section-title"><i class="fa-solid fa-clock"></i> Jam Kerja Senin – Kamis</div>
+        <div class="setting-card">
+          <div class="card-header">
+            <div class="card-header-icon blue"><i class="fa-solid fa-clock"></i></div>
+            <div><div class="card-header-title">Senin – Kamis</div><div class="card-header-sub">Jam kerja hari biasa</div></div>
+          </div>
+          <div class="card-body">
+            <div class="fields-grid">
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-arrow-right-to-bracket" style="color:var(--green)"></i> Jam Masuk <span class="badge-wajib">Wajib</span></label>
+                <div class="input-wrap"><i class="fa-regular fa-clock ico green"></i><input type="time" name="jam_masuk" class="time-input focus-green" value="{{.data.JamMasuk}}" required></div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Batas waktu hadir tepat waktu</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-arrow-right-from-bracket" style="color:var(--navy-md)"></i> Jam Pulang <span class="badge-wajib">Wajib</span></label>
+                <div class="input-wrap"><i class="fa-regular fa-clock ico blue"></i><input type="time" name="jam_pulang" class="time-input focus-blue" value="{{.data.JamPulang}}" required></div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Jam selesai kerja</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-hourglass-half" style="color:var(--yellow)"></i> Toleransi <span class="badge-opsional">Opsional</span></label>
+                <div class="input-wrap"><i class="fa-solid fa-hourglass-half ico yellow"></i><input type="time" name="toleransi" class="time-input focus-yellow" value="{{.data.Toleransi}}"></div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Masih dianggap tepat waktu</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><i class="fa-solid fa-clock"></i> Jam Kerja Jumat</div>
+        <div class="setting-card">
+          <div class="card-header">
+            <div class="card-header-icon yellow"><i class="fa-solid fa-clock"></i></div>
+            <div><div class="card-header-title">Jumat</div><div class="card-header-sub">Jam kerja khusus hari Jumat</div></div>
+          </div>
+          <div class="card-body">
+            <div class="fields-grid">
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-arrow-right-to-bracket" style="color:var(--green)"></i> Jam Masuk <span class="badge-wajib">Wajib</span></label>
+                <div class="input-wrap"><i class="fa-regular fa-clock ico green"></i><input type="time" name="jam_masuk_jumat" class="time-input focus-green" value="{{.data.JamMasukJumat}}"></div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Jam masuk khusus Jumat</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-arrow-right-from-bracket" style="color:var(--navy-md)"></i> Jam Pulang <span class="badge-wajib">Wajib</span></label>
+                <div class="input-wrap"><i class="fa-regular fa-clock ico blue"></i><input type="time" name="jam_pulang_jumat" class="time-input focus-blue" value="{{.data.JamPulangJumat}}"></div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Jam pulang khusus Jumat</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-hourglass-half" style="color:var(--yellow)"></i> Toleransi <span class="badge-opsional">Opsional</span></label>
+                <div class="input-wrap"><i class="fa-solid fa-hourglass-half ico yellow"></i><input type="time" name="toleransi_jumat" class="time-input focus-yellow" value="{{.data.ToleransiJumat}}"></div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Toleransi khusus Jumat</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><i class="fa-solid fa-map-location-dot"></i> Lokasi &amp; Radius Presensi</div>
+        <div class="setting-card">
+          <div class="card-header">
+            <div class="card-header-icon green"><i class="fa-solid fa-map-location-dot"></i></div>
+            <div><div class="card-header-title">Lokasi Kantor</div><div class="card-header-sub">Titik pusat dan radius area presensi yang diizinkan</div></div>
+          </div>
+          <div class="card-body">
+            <div class="fields-grid" style="margin-bottom:14px;">
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-location-dot" style="color:var(--navy-md)"></i> Latitude <span class="badge-wajib">Wajib</span></label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-location-dot ico blue"></i>
+                  <input type="text" name="kantor_lat" id="kantor_lat" class="text-input focus-blue" value="{{.data.KantorLat}}" placeholder="-6.901107" required oninput="updateMapFromInput()">
+                </div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Koordinat lintang kantor</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-location-dot" style="color:var(--navy-md)"></i> Longitude <span class="badge-wajib">Wajib</span></label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-location-dot ico blue"></i>
+                  <input type="text" name="kantor_lng" id="kantor_lng" class="text-input focus-blue" value="{{.data.KantorLng}}" placeholder="110.628976" required oninput="updateMapFromInput()">
+                </div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Koordinat bujur kantor</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label"><i class="fa-solid fa-circle-dot" style="color:var(--red)"></i> Radius <span class="badge-wajib">Wajib</span></label>
+                <div class="input-wrap">
+                  <i class="fa-solid fa-circle-dot ico red"></i>
+                  <input type="number" name="radius_meter" id="radius_meter" class="number-input focus-red" value="{{.data.RadiusMeter}}" min="50" max="5000" placeholder="300" required oninput="updateRadius()">
+                </div>
+                <div class="form-hint"><i class="fa-solid fa-circle-info"></i> Jarak maksimal presensi (meter)</div>
+              </div>
+            </div>
+            <button type="button" class="btn-lokasi-saya" onclick="ambilLokasiSaya()">
+              <i class="fa-solid fa-crosshairs"></i> Gunakan Lokasi Saya Sekarang
+            </button>
+            <div class="map-container">
+              <div id="setting-map"></div>
+            </div>
+            <div class="map-info">
+              <i class="fa-solid fa-circle-info"></i>
+              Klik pada peta untuk memindahkan titik lokasi kantor. Lingkaran hijau menunjukkan area radius presensi.
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end setting-col -->
+
+      <!-- KOLOM KANAN: PREVIEW -->
+      <div class="preview-sticky">
+        <div class="section-title"><i class="fa-solid fa-eye"></i> Preview Aktif</div>
+        <div class="preview-card">
+          <div class="preview-card-header">
+            <i class="fa-solid fa-calendar-check"></i>
+            <div class="preview-card-title">Jadwal yang Sedang Aktif</div>
+          </div>
+          <div class="preview-section-label"><i class="fa-solid fa-briefcase"></i> Senin – Kamis <span></span></div>
+          <div class="preview-items">
+            <div class="preview-item p-masuk">
+              <div class="preview-item-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
+              <div><div class="preview-item-label">Masuk</div><div class="preview-item-value">{{if .data.JamMasuk}}{{.data.JamMasuk}}{{else}}--:--{{end}}</div></div>
+            </div>
+            <div class="preview-item p-pulang">
+              <div class="preview-item-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+              <div><div class="preview-item-label">Pulang</div><div class="preview-item-value">{{if .data.JamPulang}}{{.data.JamPulang}}{{else}}--:--{{end}}</div></div>
+            </div>
+          </div>
+          <div class="preview-section-label"><i class="fa-solid fa-clock"></i> Jumat <span></span></div>
+          <div class="preview-items">
+            <div class="preview-item p-masuk">
+              <div class="preview-item-icon"><i class="fa-solid fa-arrow-right-to-bracket"></i></div>
+              <div><div class="preview-item-label">Masuk</div><div class="preview-item-value">{{if .data.JamMasukJumat}}{{.data.JamMasukJumat}}{{else}}--:--{{end}}</div></div>
+            </div>
+            <div class="preview-item p-pulang">
+              <div class="preview-item-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></div>
+              <div><div class="preview-item-label">Pulang</div><div class="preview-item-value">{{if .data.JamPulangJumat}}{{.data.JamPulangJumat}}{{else}}--:--{{end}}</div></div>
+            </div>
+          </div>
+          <div class="preview-radius-box">
+            <i class="fa-solid fa-circle-dot"></i>
+            <div>
+              <div class="preview-radius-label">Radius Presensi</div>
+              <div class="preview-radius-value">{{if .data.RadiusMeter}}{{.data.RadiusMeter}}{{else}}300{{end}} meter</div>
+            </div>
+          </div>
+          <div class="preview-info">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Preview ini menampilkan data yang sudah tersimpan. Ubah form lalu klik Simpan untuk memperbarui.
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end setting-layout -->
+
+    <!-- FOOTER SIMPAN -->
+    <div class="card-footer-fixed">
+      <div class="footer-note"><i class="fa-solid fa-triangle-exclamation"></i> Perubahan berlaku mulai hari berikutnya</div>
+      <div style="display:flex;gap:8px;">
+        <a href="/admin" class="btn-cancel"><i class="fa-solid fa-xmark"></i> Batal</a>
+        <button type="submit" class="btn-save"><i class="fa-solid fa-floppy-disk"></i> Simpan Pengaturan</button>
+      </div>
+    </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('overlay').classList.add('show');document.body.style.overflow='hidden';}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');document.body.style.overflow='';}
+
+function updateClock(){
+  const now=new Date(),days=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'],months=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+  document.getElementById('clock-time').textContent=now.toLocaleTimeString('id-ID',{hour12:false});
+  document.getElementById('clock-date').textContent=days[now.getDay()]+', '+now.getDate()+' '+months[now.getMonth()]+' '+now.getFullYear();
+}
+setInterval(updateClock,1000);updateClock();
+
+const defaultLat=parseFloat(document.getElementById('kantor_lat').value)||(-6.901107);
+const defaultLng=parseFloat(document.getElementById('kantor_lng').value)||(110.628976);
+const defaultRadius=parseInt(document.getElementById('radius_meter').value)||300;
+
+const map=L.map('setting-map').setView([defaultLat,defaultLng],16);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'OpenStreetMap'}).addTo(map);
+
+const marker=L.marker([defaultLat,defaultLng],{draggable:true}).addTo(map);
+let circle=L.circle([defaultLat,defaultLng],{radius:defaultRadius,color:'#1b6b35',fillColor:'#1b6b35',fillOpacity:0.12,weight:2}).addTo(map);
+
+marker.on('dragend',function(){
+  const pos=marker.getLatLng();
+  document.getElementById('kantor_lat').value=pos.lat.toFixed(10);
+  document.getElementById('kantor_lng').value=pos.lng.toFixed(10);
+  circle.setLatLng(pos);
+});
+
+map.on('click',function(e){
+  marker.setLatLng(e.latlng);
+  circle.setLatLng(e.latlng);
+  document.getElementById('kantor_lat').value=e.latlng.lat.toFixed(10);
+  document.getElementById('kantor_lng').value=e.latlng.lng.toFixed(10);
+});
+
+function updateMapFromInput(){
+  const lat=parseFloat(document.getElementById('kantor_lat').value);
+  const lng=parseFloat(document.getElementById('kantor_lng').value);
+  if(!isNaN(lat)&&!isNaN(lng)){marker.setLatLng([lat,lng]);circle.setLatLng([lat,lng]);map.setView([lat,lng],map.getZoom());}
+}
+
+function updateRadius(){
+  const r=parseInt(document.getElementById('radius_meter').value)||300;
+  circle.setRadius(r);
+}
+
+function ambilLokasiSaya(){
+  if(!navigator.geolocation){alert('GPS tidak tersedia');return;}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    const lat=pos.coords.latitude,lng=pos.coords.longitude;
+    document.getElementById('kantor_lat').value=lat.toFixed(10);
+    document.getElementById('kantor_lng').value=lng.toFixed(10);
+    marker.setLatLng([lat,lng]);circle.setLatLng([lat,lng]);map.setView([lat,lng],17);
+  },function(){alert('Gagal mendapatkan lokasi. Pastikan GPS aktif.');},{enableHighAccuracy:true});
+}
+</script>
+</body>
+</html>
